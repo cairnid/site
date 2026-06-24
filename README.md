@@ -84,7 +84,7 @@ The source of truth is `wrangler.jsonc`:
 - `routes` attaches the Worker to `cairnid.com` and `www.cairnid.com` as custom domains.
 
 GitHub Actions builds on pushes to `main` and deploys with
-`cloudflare/wrangler-action@v3`. The repository must have:
+`cloudflare/wrangler-action@v4`. The repository must have:
 
 - GitHub Actions variable `CLOUDFLARE_ACCOUNT_ID`
 - GitHub Actions secret `CLOUDFLARE_API_TOKEN`
