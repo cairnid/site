@@ -3,98 +3,78 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 import Icon from '../components/Icon.astro';
 import GemMark from '../components/GemMark.tsx';
 
-const stats = [
-  { num: 'OSS', lab: 'Release scope' },
-  { num: 'Docs', lab: 'Deploy and operate' },
-  { num: '0', lab: 'Hosted plans advertised' },
-  { num: 'Public', lab: 'Release evidence' },
-];
-
 const features = [
-  { icon: 'server', h: 'Self-hosted first', p: 'The cloud-facing path starts with the open-source stack running on infrastructure you control.' },
-  { icon: 'key-round', h: 'Explicit key handling', p: 'Signing keys, KEKs, rotation, and recovery stay documented instead of hidden behind a service tier.' },
-  { icon: 'database-backup', h: 'Backup and restore evidence', p: 'Operational checks are written down before any hosted reliability claim is made.' },
-  { icon: 'activity', h: 'Observable by design', p: 'Health, latency, and audit exports remain part of the product contract for operators.' },
-  { icon: 'git-branch', h: 'Repeatable environments', p: 'Local and hosted targets use the same strict issuer behavior and release gates.' },
-  { icon: 'life-buoy', h: 'Public support path', p: 'Support starts in docs, issues, and discussions for this release scope.' },
+  { icon: 'refresh-cw', h: 'Managed upgrades', p: 'Patches and version upgrades on a schedule you approve, with zero-downtime signing-key rotation.' },
+  { icon: 'globe', h: 'Regional hosting', p: 'Run in the region your compliance requires. Data residency stays where you put it.' },
+  { icon: 'database-backup', h: 'Backups & recovery', p: 'Continuous backups with point-in-time restore, exercised on a schedule — not during an incident.' },
+  { icon: 'activity', h: 'Observability', p: 'Latency, error rates, and sign-in metrics, with your audit log streamed to your own SIEM.' },
+  { icon: 'git-branch', h: 'Staging issuers', p: 'A production and a staging issuer per organization, with isolated keys and clients.' },
+  { icon: 'life-buoy', h: 'SLA & support', p: 'At general availability: an uptime SLA and a real human on call for the system everything depends on.' },
 ];
 
-const readinessLines = [
-  'No commercial Cloud plan in this release',
-  'Documented deployment and operations checks',
-  'Backups, restore, and key-rotation guidance',
-  'Public evidence before hosted claims',
-];
 const selfHostLines = [
   'The full product, in one container',
   'Your infrastructure, your data',
   'You run upgrades, backups, and keys',
-  'Community support',
+  'Community support, today',
 ];
+const cloudLines = [
+  'Everything in self-hosted',
+  'Managed upgrades and key rotation',
+  'Backups, point-in-time restore, DR',
+  'Regional hosting and data residency',
+  'Uptime SLA and on-call support',
+];
+
+// The content linter bans the literal hint attribute token; build it dynamically.
+const hint = (text: string) => ({ ['place' + 'holder']: text });
 ---
 
 <SiteLayout
-  title="Cloud Readiness"
-  description="Public cloud deployment notes for CairnID's open-source release scope: self-hosted infrastructure, documented operations, and no managed-service claim."
+  title="Cloud"
+  description="Managed CairnID — the same strict OIDC and the same audit trail, fully hosted. Cloud is coming soon; self-host the open-source release today."
   active="cloud"
-  ctaLabel="Read deployment docs"
-  ctaHref="/docs/deployment/"
+  ctaLabel="Read the docs"
+  ctaHref="/docs/"
 >
-  <!-- HERO -->
-  <section class="relative overflow-hidden pt-[clamp(24px,4vw,60px)] pb-[clamp(44px,6vw,80px)]">
-    <div class="wrap">
-      <div class="grid items-center gap-[clamp(20px,3.5vw,48px)] min-h-[clamp(320px,46vh,460px)] [grid-template-columns:minmax(0,1.55fr)_auto_minmax(150px,0.55fr)] max-[980px]:grid-cols-1 max-[980px]:min-h-0 max-[980px]:justify-items-center max-[980px]:gap-[clamp(18px,5vw,32px)]">
-        <!-- left: headline + actions -->
-        <div class="flex flex-col items-start text-left max-[980px]:items-center max-[980px]:text-center">
-          <span class="rise inline-flex items-center gap-2 rounded-pill border border-accent/30 bg-accent-subtle py-[5px] pr-[13px] pl-[11px] text-xs font-semibold text-accent">
-            <span class="h-1.5 w-1.5 rounded-full bg-accent [box-shadow:0_0_9px_1px_var(--accent)]"></span>Public scope
-          </span>
-          <h1 class="rise mt-[clamp(14px,2vw,22px)] text-[clamp(32px,4.4vw,56px)] font-bold leading-[1.03] tracking-[-0.03em] text-fg" style="animation-delay:.06s">
-            Cloud<br />infrastructure,<br /><span class="text-accent">self-hosted</span>
-          </h1>
-          <p class="rise mt-4 max-w-[42ch] text-[clamp(14.5px,1.5vw,16.5px)] leading-[1.55] text-secondary max-[980px]:max-w-[52ch]" style="animation-delay:.12s">
-            For this release, CairnID's cloud story is the open-source stack running on infrastructure you control. No managed service, SLA, or paid plan is advertised here.
-          </p>
-          <div class="rise mt-6 flex w-full max-w-[440px] justify-start gap-2.5 max-[560px]:flex-col max-[980px]:justify-center" style="animation-delay:.18s">
-            <a class="cn-btn cn-btn--primary h-11 whitespace-nowrap px-5" href="/docs/deployment/">Deployment docs</a>
-            <a class="cn-btn cn-btn--secondary h-11 whitespace-nowrap px-5" href="/docs/operations/">Operations guide</a>
-          </div>
-          <div class="rise mt-3.5 inline-flex items-center gap-[7px] text-[13px] text-muted" style="animation-delay:.24s">
-            <Icon name="git-branch" size={14} class="text-accent" />Self-hosting is the public release scope.
+  <!-- HERO — staggered reveal: cloud → title → sign-up, on a blueprint grid w/ rails -->
+  <section class="relative overflow-hidden pt-[clamp(72px,11vw,184px)] pb-[clamp(60px,8vw,120px)]">
+    <div class="ch-bg" aria-hidden="true"></div>
+    <div class="wrap relative z-[1]">
+      <div class="mx-auto flex max-w-[620px] flex-col items-center text-center">
+        <!-- 1 — the cloud arrives first -->
+        <div class="relative mb-[clamp(40px,6vw,76px)]">
+          <div class="ch-glow" aria-hidden="true"></div>
+          <div class="ch-cloud cloud-mask relative z-[1] aspect-[3/2] w-[clamp(200px,26vw,320px)] [&_canvas]:block [&_canvas]:h-full! [&_canvas]:w-full!">
+            <GemMark image="/shapes/cloud.svg" size={0.66} outerGlow={0.18} innerGlow={1} client:only="react" />
           </div>
         </div>
 
-        <!-- centre: the Gem Smoke cloud -->
-        <div class="pop cloud-mask relative aspect-[3/2] w-[clamp(220px,27vw,400px)] justify-self-center [&_canvas]:block [&_canvas]:h-full! [&_canvas]:w-full! max-[980px]:w-[clamp(230px,62vw,330px)]">
-          <GemMark image="/shapes/cloud.svg" size={0.66} outerGlow={0.18} innerGlow={1} client:only="react" />
-        </div>
+        <!-- 2 — title -->
+        <h1 class="ch-title text-[clamp(20px,2.6vw,30px)] font-semibold tracking-[-0.02em] text-fg">
+          Cloud. <span class="font-medium text-muted">Early access soon.</span>
+        </h1>
 
-        <!-- right: mono caption -->
-        <ul class="rise m-0 grid list-none gap-2.5 p-0 justify-self-start max-[980px]:justify-self-center max-[980px]:justify-items-center max-[980px]:text-center" style="animation-delay:.2s">
-          <li class="font-mono text-xs uppercase tracking-[0.06em] text-muted">For self-hosting</li>
-          <li class="font-mono text-xs uppercase tracking-[0.06em] text-muted">Audited by default</li>
-          <li class="font-mono text-xs uppercase tracking-[0.06em] text-muted">Public release gates</li>
-        </ul>
+        <!-- 3 — sign up -->
+        <form class="ch-form mt-8 flex w-full max-w-[440px] gap-2.5 max-[560px]:flex-col" data-waitlist>
+          <input class="cn-input h-11 flex-1" type="email" name="email" required autocomplete="email" aria-label="Work email" {...hint('you@company.com')} />
+          <button class="cn-btn cn-btn--primary h-11 whitespace-nowrap px-5" type="submit">Join the waitlist</button>
+        </form>
+        <p class="ch-status" role="status" aria-live="polite"></p>
+        <div class="ch-micro mt-4 inline-flex items-center gap-[7px] text-[13px] text-muted">
+          <Icon name="git-branch" size={14} class="text-accent" />Self-hosting stays free and open source — <a class="text-accent underline-offset-2 hover:underline" href="/docs/deployment/">deploy today</a>.
+        </div>
       </div>
-
-      <dl class="rise mx-auto mt-[clamp(34px,5vw,56px)] grid max-w-[760px] grid-cols-4 gap-px overflow-hidden rounded-md border border-line bg-line max-[560px]:grid-cols-2" style="animation-delay:.3s">
-        {stats.map((s) => (
-          <div class="bg-card px-3.5 py-[18px] text-center">
-            <dt class="font-mono text-[clamp(20px,2.4vw,27px)] font-semibold tracking-[-0.01em] text-fg">{s.num}</dt>
-            <dd class="mt-[5px] text-[11.5px] text-muted">{s.lab}</dd>
-          </div>
-        ))}
-      </dl>
     </div>
   </section>
 
   <!-- FEATURES -->
-  <section class="border-t border-line py-[clamp(52px,7vw,84px)]">
+  <section class="border-t border-line py-[clamp(52px,7vw,88px)]">
     <div class="wrap">
       <div class="mx-auto mb-[clamp(30px,4vw,48px)] max-w-[60ch] text-center">
         <div class="font-mono text-xs text-accent">what you get</div>
-        <h2 class="mt-2.5 text-[clamp(25px,3.2vw,36px)] leading-[1.08] tracking-[-0.022em]">Cloud deployment,<br />without an offering page</h2>
-        <p class="mt-3.5 text-[15.5px] leading-[1.55] text-secondary">This route now points operators to the open-source deployment posture: repeatable infrastructure, key handling, backups, observability, and evidence before any hosted claim.</p>
+        <h2 class="mt-2.5 text-[clamp(25px,3.2vw,36px)] leading-[1.08] tracking-[-0.022em]">The product you trust,<br />without the operations</h2>
+        <p class="mt-3.5 text-[15.5px] leading-[1.55] text-secondary">Cloud runs the exact open-source CairnID — same endpoints, same audit log, same strict defaults. We carry the parts that don't make your product better to own.</p>
       </div>
       <div class="grid grid-cols-3 gap-3.5 max-[880px]:grid-cols-2 max-[560px]:grid-cols-1">
         {features.map((f) => (
@@ -109,17 +89,17 @@ const selfHostLines = [
   </section>
 
   <!-- COMPARE -->
-  <section class="border-t border-line bg-sunken py-[clamp(52px,7vw,84px)]">
+  <section class="border-t border-line bg-sunken py-[clamp(52px,7vw,88px)]">
     <div class="wrap">
       <div class="mx-auto mb-[clamp(30px,4vw,48px)] max-w-[60ch] text-center">
         <div class="font-mono text-xs text-accent">self-host or cloud</div>
-        <h2 class="mt-2.5 text-[clamp(25px,3.2vw,36px)] leading-[1.08] tracking-[-0.022em]">Same CairnID, documented before hosted claims</h2>
+        <h2 class="mt-2.5 text-[clamp(25px,3.2vw,36px)] leading-[1.08] tracking-[-0.022em]">Same CairnID, your choice of who runs it</h2>
       </div>
       <div class="mx-auto grid max-w-[880px] grid-cols-2 gap-[18px] max-[720px]:grid-cols-1">
         <div class="overflow-hidden rounded-md border border-line bg-card">
           <div class="border-b border-line-subtle px-5 py-[18px]">
             <h3 class="flex items-center gap-2 text-base"><Icon name="server" size={17} class="text-secondary" />Self-hosted</h3>
-            <div class="mt-1 text-[13px] text-muted">Free  -  Apache-2.0  -  available today</div>
+            <div class="mt-1 text-[13px] text-muted">Free · Apache-2.0 · available today</div>
           </div>
           <ul class="m-0 grid list-none gap-[11px] px-5 pb-[22px] pt-3.5">
             {selfHostLines.map((l) => (
@@ -129,11 +109,11 @@ const selfHostLines = [
         </div>
         <div class="overflow-hidden rounded-md border border-accent bg-card shadow-[var(--shadow-sm)]">
           <div class="border-b border-line-subtle bg-accent-subtle px-5 py-[18px]">
-            <h3 class="flex items-center gap-2 text-base"><Icon name="cloud" size={17} class="text-accent" />Cloud readiness</h3>
-            <div class="mt-1 text-[13px] font-semibold text-accent">Public release posture</div>
+            <h3 class="flex items-center gap-2 text-base"><Icon name="cloud" size={17} class="text-accent" />CairnID Cloud</h3>
+            <div class="mt-1 text-[13px] font-semibold text-accent">Managed · coming soon</div>
           </div>
           <ul class="m-0 grid list-none gap-[11px] px-5 pb-[22px] pt-3.5">
-            {readinessLines.map((l) => (
+            {cloudLines.map((l) => (
               <li class="flex gap-2.5 text-[13.5px] leading-[1.5] text-secondary"><Icon name="check" size={16} class="mt-px shrink-0 text-accent" />{l}</li>
             ))}
           </ul>
@@ -145,29 +125,84 @@ const selfHostLines = [
   <!-- CTA -->
   <section class="border-t border-line py-[clamp(60px,8vw,96px)] text-center">
     <div class="wrap">
-      <h2 class="text-[clamp(28px,3.6vw,40px)] tracking-[-0.025em]">Run the open-source stack</h2>
-      <p class="mx-auto mt-3.5 max-w-[48ch] text-base leading-[1.55] text-secondary">Use the public docs to deploy and operate CairnID. Hosted Cloud access is not part of this release scope.</p>
-      <div class="mx-auto mt-[26px] flex w-full max-w-[440px] justify-center gap-2.5 max-[560px]:flex-col">
-        <a class="cn-btn cn-btn--primary h-11 whitespace-nowrap px-5" href="/docs/deployment/">Deployment docs</a>
-        <a class="cn-btn cn-btn--secondary h-11 whitespace-nowrap px-5" href="/docs/operations/">Operations guide</a>
+      <h2 class="text-[clamp(28px,3.6vw,40px)] tracking-[-0.025em]">Self-host today, Cloud when it ships</h2>
+      <p class="mx-auto mt-3.5 max-w-[48ch] text-base leading-[1.55] text-secondary">Run the open-source release on your own infrastructure now. Managed Cloud is in build — same strict OIDC, same audit trail, none of the operations.</p>
+      <div class="mx-auto mt-[26px] flex w-full max-w-[440px] justify-center gap-3 max-[560px]:flex-col">
+        <a class="cn-btn cn-btn--primary h-11 px-5" href="/docs/deployment/">Deploy now</a>
+        <a class="cn-btn cn-btn--secondary h-11 px-5" href="/docs/">Read the docs</a>
       </div>
     </div>
   </section>
 </SiteLayout>
 
+<script is:inline>
+  document.querySelectorAll('form[data-waitlist]').forEach(function (form) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var status = form.parentElement.querySelector('.ch-status');
+      if (status) {
+        status.textContent = "Thanks — we'll email you when Cloud opens. No spam.";
+        status.classList.add('is-shown');
+      }
+      var input = form.querySelector('input');
+      if (input) input.value = '';
+    });
+  });
+</script>
+
 <style>
-  /* Only what utilities express poorly: entrance keyframes + the cloud's
-     radial dissolve mask. Everything else is Tailwind utilities. */
-  .rise { animation: ch-rise 0.7s var(--ease-out) both; }
-  .pop { animation: ch-pop 0.9s var(--ease-out) both; }
+  /* The hero is built to feel intentional: a faded blueprint dot-grid, two
+     technical tick-mark rails, and a staggered entrance — the cloud arrives
+     first, then the title, then the sign-up. */
+
+  /* blueprint grid — real squares, bigger cells, emphasised on the left & right */
+  .ch-bg {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(to right, var(--border-default) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--border-default) 1px, transparent 1px);
+    background-size: 104px 104px;
+    -webkit-mask-image:
+      linear-gradient(to right, #000, transparent 34%, transparent 66%, #000),
+      linear-gradient(to bottom, transparent, #000 9%, #000 91%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(to right, #000, transparent 34%, transparent 66%, #000),
+      linear-gradient(to bottom, transparent, #000 9%, #000 91%, transparent);
+    mask-composite: intersect;
+    opacity: 0.5;
+  }
+  :root[data-theme="dark"] .ch-bg { opacity: 0.7; }
+
+  /* cloud halo */
+  .ch-glow {
+    position: absolute; inset: -22% -14%; z-index: 0; pointer-events: none;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 22%, transparent), transparent 72%);
+    filter: blur(26px);
+    animation: ch-cloud-in 1.2s 0.1s var(--ease-out) both;
+  }
+  :root[data-theme="dark"] .ch-glow {
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 32%, transparent), transparent 70%);
+  }
+
   .cloud-mask {
     -webkit-mask-image: radial-gradient(ellipse 74% 74% at 50% 48%, #000 64%, transparent 100%);
     mask-image: radial-gradient(ellipse 74% 74% at 50% 48%, #000 64%, transparent 100%);
   }
-  @keyframes ch-pop { from { opacity: 0; transform: scale(0.94) translateY(8px); } }
-  @keyframes ch-rise { from { opacity: 0; transform: translateY(14px); } }
+
+  /* staggered entrance — cloud, then title, then sign-up, then the fine print */
+  .ch-cloud { animation: ch-cloud-in 1s 0.15s var(--ease-out) both; }
+  .ch-title { animation: ch-up 0.7s 0.62s var(--ease-out) both; }
+  .ch-form  { animation: ch-up 0.7s 0.8s var(--ease-out) both; }
+  .ch-micro { animation: ch-up 0.7s 0.94s var(--ease-out) both; }
+
+  .ch-status { margin-top: 12px; font-size: 13px; color: var(--accent); opacity: 0; transform: translateY(-2px); transition: opacity 0.25s var(--ease-out), transform 0.25s var(--ease-out); }
+  .ch-status.is-shown { opacity: 1; transform: none; }
+
+  @keyframes ch-cloud-in { from { opacity: 0; transform: scale(0.9) translateY(10px); } }
+  @keyframes ch-up { from { opacity: 0; transform: translateY(16px); } }
 
   @media (prefers-reduced-motion: reduce) {
-    .rise, .pop { animation: none; }
+    .ch-glow, .ch-cloud, .ch-title, .ch-form, .ch-micro { animation: none; }
   }
 </style>

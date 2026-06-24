@@ -59,8 +59,8 @@ import Wallpaper from '../components/Wallpaper.astro';
 
   <!-- CONSENT -->
   <section class="border-b border-line-subtle py-[clamp(40px,5vw,64px)]" id="consent">
-    <div class="wrap grid grid-cols-[0.82fr_1.18fr] items-center gap-[clamp(28px,4vw,56px)] max-[820px]:grid-cols-1">
-      <div>
+    <div class="wrap grid grid-cols-[1.18fr_0.82fr] items-center gap-[clamp(28px,4vw,56px)] max-[820px]:grid-cols-1">
+      <div class="min-[821px]:order-2">
         <span class="inline-flex items-center gap-[7px] rounded-pill bg-accent-subtle px-[11px] py-1 font-mono text-xs text-accent"><Icon name="app-window" size={14} />/consent</span>
         <h2 class="mt-4 text-[clamp(22px,2.6vw,30px)] leading-[1.12] tracking-[-0.018em]">OAuth consent</h2>
         <p class="mt-3 max-w-[46ch] text-[14.5px] leading-[1.6] text-secondary">Before an application acts on someone's behalf, the consent screen states the exact scopes, the exact redirect, and who is signed in. Granting is per-scope, and every grant can be revoked later from the account portal.</p>
@@ -70,7 +70,7 @@ import Wallpaper from '../components/Wallpaper.astro';
           <li class="flex items-start gap-2.5 text-[13.5px] text-secondary"><Icon name="check" size={16} class="mt-px shrink-0 text-accent" />Revocable any time, from your account</li>
         </ul>
       </div>
-      <div class="stage">
+      <div class="stage min-[821px]:order-1">
         <Wallpaper variant={1} />
         <div class="float-card">
           <div class="p-[22px]">
@@ -124,8 +124,8 @@ import Wallpaper from '../components/Wallpaper.astro';
 
   <!-- ADMIN -->
   <section class="border-b border-line-subtle py-[clamp(40px,5vw,64px)]" id="admin">
-    <div class="wrap grid grid-cols-[0.82fr_1.18fr] items-center gap-[clamp(28px,4vw,56px)] max-[820px]:grid-cols-1">
-      <div>
+    <div class="wrap grid grid-cols-[1.18fr_0.82fr] items-center gap-[clamp(28px,4vw,56px)] max-[820px]:grid-cols-1">
+      <div class="min-[821px]:order-2">
         <span class="inline-flex items-center gap-[7px] rounded-pill bg-accent-subtle px-[11px] py-1 font-mono text-xs text-accent"><Icon name="layout-dashboard" size={14} />/admin</span>
         <h2 class="mt-4 text-[clamp(22px,2.6vw,30px)] leading-[1.12] tracking-[-0.018em]">Admin console</h2>
         <p class="mt-3 max-w-[46ch] text-[14.5px] leading-[1.6] text-secondary">Where operators live: organizations, users, groups, OIDC applications, consent policies, and the full audit log. Dense, legible tables with tabular numerals and a small, fixed set of status pills.</p>
@@ -135,7 +135,7 @@ import Wallpaper from '../components/Wallpaper.astro';
           <li class="flex items-start gap-2.5 text-[13.5px] text-secondary"><Icon name="check" size={16} class="mt-px shrink-0 text-accent" />Filter the audit log and export NDJSON</li>
         </ul>
       </div>
-      <div class="stage stage--wide">
+      <div class="stage stage--wide min-[821px]:order-1">
         <Wallpaper variant={3} />
         <div class="float-card console-card">
           <div class="min-h-[300px] bg-page">
