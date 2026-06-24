@@ -1,0 +1,35 @@
+﻿---
+/*
+ * CairnMark  -  the stacked-stone glyph behind the CairnID identity: three teal
+ * stones, widest at the base, narrowing as they rise (a cairn marks a verified
+ * path). The mark is the brand's one decorative graphic and is always drawn in
+ * the three cairn teals, in both light and dark themes  -  drawn inline so it
+ * pulls no external file. Matches assets/cairn-mark.svg from the design system.
+ */
+type Props = {
+  size?: number;
+  class?: string;
+  title?: string;
+};
+
+const { size = 25, class: className, title } = Astro.props;
+const labelled = typeof title === 'string';
+---
+<svg
+  class:list={['cairn-mark', className]}
+  width={size}
+  height={size}
+  viewBox="0 0 48 48"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+  role={labelled ? 'img' : undefined}
+  aria-label={labelled ? title : undefined}
+  aria-hidden={labelled ? undefined : 'true'}
+>
+  <rect x="6" y="31" width="36" height="10" rx="5" fill="#0C5F4F" />
+  <rect x="12" y="18.5" width="24" height="10" rx="5" fill="#12876F" />
+  <rect x="17" y="6" width="14" height="10" rx="5" fill="#1EA487" />
+</svg>
+<style>
+  .cairn-mark { display: block; flex: none; }
+</style>

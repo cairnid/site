@@ -1,0 +1,23 @@
+---
+import Icon from '../Icon.astro';
+
+type Props = {
+  mono?: boolean;
+  removable?: boolean;
+  class?: string;
+  [key: string]: unknown;
+};
+
+const {
+  mono = false,
+  removable = false,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const classes = ['cn-chip', mono ? 'cn-chip--mono' : '', className].filter(Boolean).join(' ');
+---
+<span class={classes} {...rest}>
+  <slot />
+  {removable && <span class="cn-chip__remove" aria-hidden="true"><Icon name="x" size={12} /></span>}
+</span>

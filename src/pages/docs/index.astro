@@ -1,0 +1,13 @@
+---
+import { getCollection, render } from 'astro:content';
+import { getDocOrThrow } from '../../lib/docs';
+import DocsLayout from '../../layouts/DocsLayout.astro';
+
+const docs = await getCollection('docs');
+const doc = getDocOrThrow(docs, 'index');
+const { Content, headings } = await render(doc);
+---
+
+<DocsLayout doc={doc} docs={docs} headings={headings}>
+  <Content />
+</DocsLayout>

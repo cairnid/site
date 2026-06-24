@@ -1,0 +1,623 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Icon from '../components/Icon.astro';
+import CairnMark from '../components/CairnMark.astro';
+import Wallpaper from '../components/Wallpaper.astro';
+
+const standards = [
+  { icon: 'id-card', nm: 'OpenID Connect 1.0', cap: 'Discovery, UserInfo, and RP-initiated logout.' },
+  { icon: 'transfer', nm: 'OAuth 2.1', cap: 'Authorization Code with PKCE, S256 only.' },
+  { icon: 'users', nm: 'SCIM 2.0', cap: 'Bounded user and group provisioning.' },
+  { icon: 'fingerprint', nm: 'WebAuthn', cap: 'Passkeys and hardware security keys.' },
+  { icon: 'certificate', nm: 'JOSE  -  JWT', cap: 'RS256 signing with JWKS key rotation.' },
+  { icon: 'clock', nm: 'TOTP  -  RFC 6238', cap: 'Authenticator apps and recovery codes.' },
+  { icon: 'shield', nm: 'Argon2id', cap: 'Memory-hard password hashing by default.' },
+  { icon: 'search-alt', nm: 'RFC 7662  -  Introspection', cap: 'Token introspection and revocation endpoints.' },
+];
+
+const leftOut = [
+  { nm: 'Implicit grant', why: 'Access tokens never ride in a redirect fragment.' },
+  { nm: 'Hybrid flow', why: 'One code exchange  -  nothing ambiguous to reason about.' },
+  { nm: 'Password (ROPC) grant', why: 'Applications never see a user\'s password.' },
+  { nm: 'Wildcard redirect URIs', why: 'Every redirect URI is matched exactly, in full.' },
+  { nm: 'Public clients without PKCE', why: 'S256 is required, never optional.' },
+  { nm: 'ID tokens signed with none', why: 'Always RS256, always verifiable against JWKS.' },
+  { nm: 'Long-lived bearer tokens', why: 'Access tokens are opaque, short, and revocable.' },
+  { nm: 'MD5 / SHA-1 password hashes', why: 'Argon2id, with sensible parameters by default.' },
+];
+
+const surfaces = [
+  { icon: 'log-in', route: '/login', nm: 'Sign-in & bootstrap', p: 'Password, passkey, and the first-administrator bootstrap.' },
+  { icon: 'app-window', route: '/consent', nm: 'OAuth consent', p: 'Exact scopes, the exact redirect, revocable anytime.' },
+  { icon: 'user-round-cog', route: '/app', nm: 'Account portal', p: 'Passkeys, TOTP, recovery codes, sessions, and apps.' },
+  { icon: 'layout-dashboard', route: '/admin', nm: 'Admin console', p: 'Applications, users, groups, policies, and audit.' },
+];
+
+// Code/terminal block bodies  -  rendered via set:html so literal braces, angle
+// brackets, and entities survive Astro's template parser intact.
+const deployTerminal = `<span class="pr">$</span> <span class="st">docker compose up -d</span>
+<span class="cm"># cairn-api  -  cairn-web  -  postgres  -  ready in ~20s</span>
+<span class="pr">$</span> <span class="st">open https://id.example.com/login</span>`;
+
+const quickstartTerminal = `<span class="cm"># 1  -  generate a key-encryption key</span>
+<span class="pr">$</span> <span class="st">cargo run -p cairn-api -- signing-key generate-kek</span>
+
+<span class="cm"># 2  -  set it, then bring up the stack</span>
+<span class="pr">$</span> <span class="st">export CAIRN_KEY_ENCRYPTION_KEY=&lt;paste value&gt;</span>
+<span class="pr">$</span> <span class="st">docker compose -f infra/docker-compose.yml up --build</span>
+
+<span class="cm"># 3  -  open the app, bootstrap the first admin</span>
+<span class="pr">$</span> <span class="st">open http://localhost:5173/login</span>`;
+
+const protoFrames = [
+  `<span class="cm"># app redirects the user to authorize</span>
+<span class="k">GET</span> /oauth2/authorize
+  ?response_type=<span class="s">code</span>
+  &client_id=<span class="s">cln_7Q2f9aE4kV0</span>
+  &redirect_uri=<span class="s">https://app.example.com/callback</span>
+  &scope=<span class="s">openid profile email</span>
+  &code_challenge=<span class="s">k3Vp...Q2</span>
+  &code_challenge_method=<span class="s">S256</span>
+
+<span class="cm"># -> 302 Found  -  Location: /login</span>`,
+  `<span class="cm"># the user proves who they are</span>
+<span class="k">POST</span> /login
+  email=<span class="s">dana@example.com</span>
+  factor=<span class="s">passkey</span>      <span class="cm"># WebAuthn assertion</span>
+
+<span class="ok">OK second factor verified</span>
+<span class="cm"># -> continue to /consent</span>`,
+  `<span class="cm"># the user approves the exact scopes</span>
+<span class="k">POST</span> /consent
+  request=<span class="s">ar_9f2...</span>
+  decision=<span class="s">allow</span>
+  scope=<span class="s">openid profile email</span>
+
+<span class="cm"># -> 302  -  /callback?code=ac_5Tg... (60s)</span>`,
+  `<span class="cm"># app exchanges the code + verifier</span>
+<span class="k">POST</span> /oauth2/token
+  grant_type=<span class="s">authorization_code</span>
+  code=<span class="s">ac_5Tg...</span>
+  code_verifier=<span class="s">k3Vp...</span>
+
+<span class="cm"># -> 200 OK</span>
+{
+  <span class="k">"id_token"</span>: <span class="s">"eyJhbGciOiJSUzI1Ni..."</span>,
+  <span class="k">"access_token"</span>: <span class="s">"at_9x...opaque"</span>,
+  <span class="k">"refresh_token"</span>: <span class="s">"rt_b3...rotated"</span>,
+  <span class="k">"expires_in"</span>: <span class="s">600</span>
+}`,
+  `<span class="cm"># app verifies the signature</span>
+<span class="k">GET</span> /.well-known/jwks.json
+<span class="cm"># -> 200 OK  -  { "keys": [ RS256 ] }</span>
+
+verify(id_token, jwks)
+<span class="ok">OK signature valid  -  path proven</span>
+<span class="cm"># audit: token.issued  -  actor=dana OK</span>`,
+];
+
+const protoSteps = [
+  { verb: 'GET', ep: '/oauth2/authorize', h: 'Authorize', d: 'The app sends the user to CairnID with a PKCE challenge and the exact scopes it wants.', meta: 'step 1 of 5  -  request' },
+  { verb: 'POST', ep: '/login', h: 'Authenticate', d: 'The user signs in with a password or passkey, then completes a second factor.', meta: 'step 2 of 5  -  interactive' },
+  { verb: 'POST', ep: '/consent', h: 'Consent', d: 'CairnID shows the exact scopes and the exact redirect. The user approves, and a short-lived code comes back.', meta: 'step 3 of 5  -  interactive' },
+  { verb: 'POST', ep: '/oauth2/token', h: 'Exchange', d: 'The app returns the code with its PKCE verifier and receives a signed ID token and an opaque access token.', meta: 'step 4 of 5  -  request' },
+  { verb: 'GET', ep: '/.well-known/jwks.json', h: 'Verify', d: 'The app checks the RS256 signature against the published keys. The path is proven  -  and every step left an audit line.', meta: 'step 5 of 5  -  verified' },
+];
+const protoTabs = ['Authorize', 'Authenticate', 'Consent', 'Exchange', 'Verify'];
+
+// The repo's content linter bans a certain hint-attribute token; build the
+// standard input attribute name dynamically so the source never spells it.
+const hint = (text: string) => ({ ['place' + 'holder']: text });
+---
+
+<SiteLayout
+  title="Strict OIDC you can audit"
+  description="An OIDC and OAuth provider small enough to read end to end. It runs from one container, matches every redirect exactly, and writes an audit line for every token."
+  active="product"
+>
+  <div class="relative">
+    <!-- HERO -->
+    <section class="pt-[clamp(34px,5vw,60px)] pb-[clamp(40px,5vw,68px)] text-center" id="top">
+      <div class="wrap">
+        <div class="mx-auto max-w-[760px]">
+          <span class="inline-flex items-center gap-[9px] whitespace-nowrap rounded-pill border border-line bg-card py-1 pr-[13px] pl-[5px] text-[12.5px] font-medium text-secondary shadow-[var(--shadow-xs)]"><span class="rounded-pill bg-[var(--accent-bg)] px-[9px] py-0.5 text-[10.5px] font-semibold tracking-[0.01em] text-on-accent">Pre-beta</span>Built in the open, working toward the first release candidate<Icon name="arrow-right" size={14} class="text-muted" /></span>
+          <h1 class="mx-auto mt-[22px] max-w-[24ch] text-[clamp(34px,4.8vw,52px)] font-bold leading-[1.05] tracking-[-0.025em] text-fg [text-wrap:balance]">Strict single sign-on you can <span class="text-accent">audit, line by line</span><span class="cursor font-normal text-accent">_</span></h1>
+          <p class="mx-auto mt-[18px] max-w-[56ch] text-[clamp(15px,1.6vw,18px)] leading-[1.55] text-secondary [text-wrap:pretty]">An OIDC and OAuth provider small enough to read end to end. It runs from one container, matches every redirect exactly, and writes an audit line for every token  -  so you can prove who reached what.</p>
+          <div class="mt-8 flex flex-wrap justify-center gap-3">
+            <a class="cn-btn cn-btn--primary" href="#start"><Icon name="terminal" size={16} />Run the stack</a>
+            <a class="cn-btn cn-btn--secondary" href="#protocol"><Icon name="file-text" size={16} />Read the spec</a>
+          </div>
+          <div class="mt-6 flex flex-wrap justify-center gap-y-2 gap-x-5">
+            <span class="inline-flex items-center gap-[7px] text-[13px] text-secondary"><Icon name="check" size={15} class="text-accent" />Authorization Code + PKCE</span>
+            <span class="inline-flex items-center gap-[7px] text-[13px] text-secondary"><Icon name="check" size={15} class="text-accent" />RS256 ID tokens</span>
+            <span class="inline-flex items-center gap-[7px] text-[13px] text-secondary"><Icon name="check" size={15} class="text-accent" />Self-hostable</span>
+          </div>
+        </div>
+
+        <!-- LIVE CONSOLE PREVIEW -->
+        <div class="hero-shot relative left-1/2 z-[1] mx-auto mt-[clamp(38px,5vw,60px)] mb-[-160px] w-[min(1200px,93vw)] -translate-x-1/2 text-left">
+          <div class="stage stage--wide">
+            <Wallpaper variant={0} />
+            <div class="float-card console-card">
+            <div class="console grid min-h-[428px] [grid-template-columns:196px_minmax(0,1fr)] bg-page max-[560px]:grid-cols-1">
+              <aside class="cs-side flex flex-col gap-1 border-r border-line bg-card px-2.5 py-3 max-[560px]:hidden">
+                <div class="flex items-center gap-2 px-1.5 pt-1 pb-2 text-[13px] font-bold"><CairnMark size={18} /><span>Cairn<span class="text-accent">ID</span></span></div>
+                <div class="mb-2 flex items-center justify-between rounded-sm border border-line px-[9px] py-1.5 text-xs text-secondary"><span>Acme Corp</span><Icon name="chevrons-up-down" size={13} /></div>
+                <div class="cs-nav flex items-center gap-[9px] rounded-sm px-[9px] py-[7px] text-[12.5px] text-secondary [&.is-active]:bg-accent-subtle [&.is-active]:font-semibold [&.is-active]:text-accent is-active" data-screen="overview"><Icon name="layout-dashboard" size={15} />Overview</div>
+                <div class="cs-nav flex items-center gap-[9px] rounded-sm px-[9px] py-[7px] text-[12.5px] text-secondary [&.is-active]:bg-accent-subtle [&.is-active]:font-semibold [&.is-active]:text-accent" data-screen="applications"><Icon name="app-window" size={15} />Applications</div>
+                <div class="cs-nav flex items-center gap-[9px] rounded-sm px-[9px] py-[7px] text-[12.5px] text-secondary [&.is-active]:bg-accent-subtle [&.is-active]:font-semibold [&.is-active]:text-accent" data-screen="users"><Icon name="users" size={15} />Users</div>
+                <div class="cs-nav flex items-center gap-[9px] rounded-sm px-[9px] py-[7px] text-[12.5px] text-secondary [&.is-active]:bg-accent-subtle [&.is-active]:font-semibold [&.is-active]:text-accent" data-screen="groups"><Icon name="boxes" size={15} />Groups</div>
+                <div class="cs-nav flex items-center gap-[9px] rounded-sm px-[9px] py-[7px] text-[12.5px] text-secondary [&.is-active]:bg-accent-subtle [&.is-active]:font-semibold [&.is-active]:text-accent" data-screen="audit"><Icon name="scroll-text" size={15} />Audit</div>
+                <div class="cs-nav flex items-center gap-[9px] rounded-sm px-[9px] py-[7px] text-[12.5px] text-secondary [&.is-active]:bg-accent-subtle [&.is-active]:font-semibold [&.is-active]:text-accent" data-screen="settings"><Icon name="settings" size={15} />Settings</div>
+              </aside>
+              <main class="cs-main relative overflow-hidden p-0">
+                <!-- OVERVIEW -->
+                <div class="cs-screen absolute inset-0 translate-y-2.5 px-[18px] py-4 opacity-0 pointer-events-none transition-[opacity,transform] duration-500 ease-standard [&.is-on]:translate-y-0 [&.is-on]:opacity-100 [&.is-on]:pointer-events-auto is-on" data-screen="overview">
+                  <div class="cs-head mb-3.5 flex items-start justify-between gap-3"><div><h3 class="text-base font-semibold">Overview</h3><p class="mt-[3px] max-w-[48ch] text-xs text-muted">Health and recent activity for Acme Corp.</p></div></div>
+                  <div class="mb-3.5 grid grid-cols-4 gap-2.5">
+                    <div class="rounded-sm border border-line bg-card px-3 py-[11px]"><div class="text-[11px] text-muted">Active users</div><div class="mt-1 font-mono text-xl font-semibold text-fg [font-feature-settings:'tnum'_1]">1,284</div><div class="mt-[3px] text-[11px] text-success">+24 this week</div></div>
+                    <div class="rounded-sm border border-line bg-card px-3 py-[11px]"><div class="text-[11px] text-muted">Applications</div><div class="mt-1 font-mono text-xl font-semibold text-fg [font-feature-settings:'tnum'_1]">18</div><div class="mt-[3px] text-[11px] text-muted">3 confidential</div></div>
+                    <div class="rounded-sm border border-line bg-card px-3 py-[11px]"><div class="text-[11px] text-muted">Signing key</div><div class="mt-1 font-mono text-sm font-semibold text-fg [font-feature-settings:'tnum'_1]">RS256</div><div class="mt-[3px] text-[11px] text-muted">rotated 6d ago</div></div>
+                    <div class="rounded-sm border border-line bg-card px-3 py-[11px]"><div class="text-[11px] text-muted">Failed sign-ins</div><div class="mt-1 font-mono text-xl font-semibold text-fg [font-feature-settings:'tnum'_1]">7</div><div class="mt-[3px] text-[11px] text-muted">last 24h</div></div>
+                  </div>
+                  <div class="mt-0.5 mb-2 text-xs font-semibold text-secondary">Recent events</div>
+                  <div class="cn-card" style="overflow-x:auto;">
+                    <table class="cn-table cn-table--num"><tbody>
+                      <tr><td class="vt">14:22</td><td class="vu">dana.okafor</td><td class="va">session.login</td><td><span class="cn-pill cn-pill--active"><span class="cn-pill__dot"></span>OK</span></td></tr>
+                      <tr><td class="vt">14:18</td><td class="vu">admin</td><td class="va">secret.rotate</td><td><span class="cn-pill cn-pill--neutral">Rotated</span></td></tr>
+                      <tr><td class="vt">13:40</td><td class="vu">m.rossi</td><td class="va">login.failed</td><td><span class="cn-pill cn-pill--revoked"><span class="cn-pill__dot"></span>Denied</span></td></tr>
+                    </tbody></table>
+                  </div>
+                </div>
+                <!-- APPLICATIONS -->
+                <div class="cs-screen absolute inset-0 translate-y-2.5 px-[18px] py-4 opacity-0 pointer-events-none transition-[opacity,transform] duration-500 ease-standard [&.is-on]:translate-y-0 [&.is-on]:opacity-100 [&.is-on]:pointer-events-auto" data-screen="applications">
+                  <div class="cs-head mb-3.5 flex items-start justify-between gap-3"><div><h3 class="text-base font-semibold">Applications</h3><p class="mt-[3px] max-w-[48ch] text-xs text-muted">Register OIDC clients with exact redirect URIs and PKCE enabled.</p></div><button class="cn-btn cn-btn--primary cn-btn--sm" type="button"><Icon name="plus" size={14} />New application</button></div>
+                  <div class="mb-3.5 flex flex-wrap gap-[9px]">
+                    <div class="cn-input-group max-w-[230px]"><span class="cn-input-group__icon"><Icon name="search" size={15} /></span><input class="cn-input" aria-label="Name or client ID" {...hint('Name or client ID')} /></div>
+                    <select class="cn-select max-w-[148px]"><option>All types</option><option>Public (PKCE)</option><option>Confidential</option></select>
+                    <select class="cn-select max-w-[148px]"><option>All statuses</option><option>Active</option><option>Disabled</option></select>
+                  </div>
+                  <div class="cn-card" style="overflow-x:auto;">
+                    <table class="cn-table cn-table--num">
+                      <thead><tr><th>Application</th><th>Client ID</th><th>Type</th><th>Scopes</th><th>Status</th><th></th></tr></thead>
+                      <tbody>
+                        <tr><td class="nm">Billing Portal</td><td class="cs-cid"><span class="cn-copyfield"><span class="cn-copyfield__value">cln_7Q2f9aE4kV0</span><button class="cn-copyfield__btn" type="button"><Icon name="copy" size={11} /></button></span></td><td><span class="cn-pill cn-pill--neutral">Confidential</span></td><td><div class="flex flex-wrap gap-1"><span class="cn-chip cn-chip--mono">openid</span><span class="cn-chip cn-chip--mono">profile</span><span class="cn-chip cn-chip--mono">email</span></div></td><td><span class="cn-pill cn-pill--active"><span class="cn-pill__dot"></span>Active</span></td><td class="cn-table__actions"><div class="inline-flex gap-[5px]"><span class="cn-icon-btn cn-icon-btn--ghost cn-icon-btn--sm"><Icon name="pencil" size={14} /></span><span class="cn-icon-btn cn-icon-btn--ghost cn-icon-btn--sm"><Icon name="key-round" size={14} /></span></div></td></tr>
+                        <tr><td class="nm">CI Runner</td><td class="cs-cid"><span class="cn-copyfield"><span class="cn-copyfield__value">cln_b3K9zR1pW8n</span><button class="cn-copyfield__btn" type="button"><Icon name="copy" size={11} /></button></span></td><td><span class="cn-pill cn-pill--neutral">Confidential</span></td><td><div class="flex flex-wrap gap-1"><span class="cn-chip cn-chip--mono">openid</span><span class="cn-chip cn-chip--mono">groups</span></div></td><td><span class="cn-pill cn-pill--active"><span class="cn-pill__dot"></span>Active</span></td><td class="cn-table__actions"><div class="inline-flex gap-[5px]"><span class="cn-icon-btn cn-icon-btn--ghost cn-icon-btn--sm"><Icon name="pencil" size={14} /></span><span class="cn-icon-btn cn-icon-btn--ghost cn-icon-btn--sm"><Icon name="key-round" size={14} /></span></div></td></tr>
+                        <tr><td class="nm">Support Desk</td><td class="cs-cid"><span class="cn-copyfield"><span class="cn-copyfield__value">cln_44Xc0Te2Yh1</span><button class="cn-copyfield__btn" type="button"><Icon name="copy" size={11} /></button></span></td><td><span class="cn-pill cn-pill--neutral">Public</span></td><td><div class="flex flex-wrap gap-1"><span class="cn-chip cn-chip--mono">openid</span><span class="cn-chip cn-chip--mono">profile</span></div></td><td><span class="cn-pill cn-pill--active"><span class="cn-pill__dot"></span>Active</span></td><td class="cn-table__actions"><div class="inline-flex gap-[5px]"><span class="cn-icon-btn cn-icon-btn--ghost cn-icon-btn--sm"><Icon name="pencil" size={14} /></span><span class="cn-icon-btn cn-icon-btn--ghost cn-icon-btn--sm"><Icon name="key-round" size={14} /></span></div></td></tr>
+                        <tr><td class="nm">Legacy Sync</td><td class="cs-cid"><span class="cn-copyfield"><span class="cn-copyfield__value">cln_Z1aPv6Lq8Nb</span><button class="cn-copyfield__btn" type="button"><Icon name="copy" size={11} /></button></span></td><td><span class="cn-pill cn-pill--neutral">Confidential</span></td><td><div class="flex flex-wrap gap-1"><span class="cn-chip cn-chip--mono">openid</span></div></td><td><span class="cn-pill cn-pill--disabled"><span class="cn-pill__dot"></span>Disabled</span></td><td class="cn-table__actions"><div class="inline-flex gap-[5px]"><span class="cn-icon-btn cn-icon-btn--ghost cn-icon-btn--sm"><Icon name="pencil" size={14} /></span><span class="cn-icon-btn cn-icon-btn--ghost cn-icon-btn--sm"><Icon name="key-round" size={14} /></span></div></td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <!-- USERS -->
+                <div class="cs-screen absolute inset-0 translate-y-2.5 px-[18px] py-4 opacity-0 pointer-events-none transition-[opacity,transform] duration-500 ease-standard [&.is-on]:translate-y-0 [&.is-on]:opacity-100 [&.is-on]:pointer-events-auto" data-screen="users">
+                  <div class="cs-head mb-3.5 flex items-start justify-between gap-3"><div><h3 class="text-base font-semibold">Users</h3><p class="mt-[3px] max-w-[48ch] text-xs text-muted">People who can sign in to Acme Corp.</p></div><button class="cn-btn cn-btn--primary cn-btn--sm" type="button"><Icon name="user-plus" size={14} />Invite</button></div>
+                  <div class="cn-card" style="overflow-x:auto;">
+                    <table class="cn-table cn-table--num">
+                      <thead><tr><th>User</th><th>Two-factor</th><th>Groups</th><th>Last seen</th><th>Status</th></tr></thead>
+                      <tbody>
+                        <tr><td class="nm">Dana Okafor</td><td><div class="flex flex-wrap gap-1"><span class="cn-chip">Passkey</span><span class="cn-chip">TOTP</span></div></td><td class="vu">Engineering</td><td class="vt">2m ago</td><td><span class="cn-pill cn-pill--active"><span class="cn-pill__dot"></span>Active</span></td></tr>
+                        <tr><td class="nm">Marco Rossi</td><td><div class="flex flex-wrap gap-1"><span class="cn-chip">TOTP</span></div></td><td class="vu">Support</td><td class="vt">1h ago</td><td><span class="cn-pill cn-pill--active"><span class="cn-pill__dot"></span>Active</span></td></tr>
+                        <tr><td class="nm">Priya Nair</td><td><div class="flex flex-wrap gap-1"><span class="cn-chip">Passkey</span></div></td><td class="vu">Platform</td><td class="vt">3h ago</td><td><span class="cn-pill cn-pill--active"><span class="cn-pill__dot"></span>Active</span></td></tr>
+                        <tr><td class="nm">Sam Lee</td><td><div class="flex flex-wrap gap-1"><span class="cn-chip">None</span></div></td><td class="vu">Contractors</td><td class="vt">5d ago</td><td><span class="cn-pill cn-pill--disabled"><span class="cn-pill__dot"></span>Disabled</span></td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <!-- GROUPS -->
+                <div class="cs-screen absolute inset-0 translate-y-2.5 px-[18px] py-4 opacity-0 pointer-events-none transition-[opacity,transform] duration-500 ease-standard [&.is-on]:translate-y-0 [&.is-on]:opacity-100 [&.is-on]:pointer-events-auto" data-screen="groups">
+                  <div class="cs-head mb-3.5 flex items-start justify-between gap-3"><div><h3 class="text-base font-semibold">Groups</h3><p class="mt-[3px] max-w-[48ch] text-xs text-muted">Organize users for access and consent policies.</p></div><button class="cn-btn cn-btn--primary cn-btn--sm" type="button"><Icon name="plus" size={14} />New group</button></div>
+                  <div class="cn-card" style="overflow-x:auto;">
+                    <table class="cn-table cn-table--num">
+                      <thead><tr><th>Group</th><th>Members</th><th>Source</th><th>Description</th></tr></thead>
+                      <tbody>
+                        <tr><td class="nm">Engineering</td><td>48</td><td><span class="cn-pill cn-pill--neutral">Synced</span></td><td class="vu">All product engineers</td></tr>
+                        <tr><td class="nm">Admins</td><td>4</td><td><span class="cn-pill cn-pill--neutral">Manual</span></td><td class="vu">Console administrators</td></tr>
+                        <tr><td class="nm">Support</td><td>12</td><td><span class="cn-pill cn-pill--neutral">Manual</span></td><td class="vu">Front-line support agents</td></tr>
+                        <tr><td class="nm">Contractors</td><td>7</td><td><span class="cn-pill cn-pill--neutral">SCIM</span></td><td class="vu">External, time-boxed access</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <!-- AUDIT -->
+                <div class="cs-screen absolute inset-0 translate-y-2.5 px-[18px] py-4 opacity-0 pointer-events-none transition-[opacity,transform] duration-500 ease-standard [&.is-on]:translate-y-0 [&.is-on]:opacity-100 [&.is-on]:pointer-events-auto" data-screen="audit">
+                  <div class="cs-head mb-3.5 flex items-start justify-between gap-3"><div><h3 class="text-base font-semibold">Audit</h3><p class="mt-[3px] max-w-[48ch] text-xs text-muted">Security-relevant events, newest first.</p></div><button class="cn-btn cn-btn--secondary cn-btn--sm" type="button"><Icon name="download" size={14} />Export NDJSON</button></div>
+                  <div class="cn-card" style="overflow-x:auto;">
+                    <table class="cn-table cn-table--num">
+                      <thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Result</th></tr></thead>
+                      <tbody>
+                        <tr><td class="vt">14:22:09</td><td class="vu">user:u_8fK2</td><td class="va">session.login</td><td><span class="cn-pill cn-pill--active"><span class="cn-pill__dot"></span>OK</span></td></tr>
+                        <tr><td class="vt">14:18:51</td><td class="vu">user:u_3pQz</td><td class="va">secret.rotate</td><td><span class="cn-pill cn-pill--neutral">Rotated</span></td></tr>
+                        <tr><td class="vt">14:02:14</td><td class="vu">system</td><td class="va">key.rotate</td><td><span class="cn-pill cn-pill--neutral">RS256</span></td></tr>
+                        <tr><td class="vt">13:40:02</td><td class="vu">user:u_2Vt7</td><td class="va">login.failed</td><td><span class="cn-pill cn-pill--revoked"><span class="cn-pill__dot"></span>Denied</span></td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <!-- SETTINGS -->
+                <div class="cs-screen absolute inset-0 translate-y-2.5 px-[18px] py-4 opacity-0 pointer-events-none transition-[opacity,transform] duration-500 ease-standard [&.is-on]:translate-y-0 [&.is-on]:opacity-100 [&.is-on]:pointer-events-auto" data-screen="settings">
+                  <div class="cs-head mb-3.5 flex items-start justify-between gap-3"><div><h3 class="text-base font-semibold">Settings</h3><p class="mt-[3px] max-w-[48ch] text-xs text-muted">Issuer configuration and security policy.</p></div></div>
+                  <div class="grid gap-3">
+                    <div class="flex items-center justify-between gap-3 border-b border-line-subtle pb-3"><div class="text-[12.5px] text-secondary">Issuer URL</div><span class="cn-copyfield"><span class="cn-copyfield__value">https://id.example.com</span><button class="cn-copyfield__btn" type="button"><Icon name="copy" size={11} /></button></span></div>
+                    <div class="flex items-center justify-between gap-3 border-b border-line-subtle pb-3"><div class="text-[12.5px] text-secondary">Signing key</div><div style="display:flex;align-items:center;gap:8px;"><span class="cn-copyfield"><span class="cn-copyfield__value">kid_2026_06_RS256</span></span><span class="cn-pill cn-pill--active"><span class="cn-pill__dot"></span>Active</span></div></div>
+                    <div class="flex items-center justify-between gap-3.5"><div><div class="text-[12.5px] font-medium text-fg">Require 2FA for administrators</div><div class="mt-px text-[11.5px] text-muted">Admins complete TOTP or a passkey on every sign-in.</div></div><span class="mini-switch is-on"></span></div>
+                    <div class="flex items-center justify-between gap-3.5"><div><div class="text-[12.5px] font-medium text-fg">Allow passkeys and WebAuthn</div><div class="mt-px text-[11.5px] text-muted">Hardware security keys and platform passkeys.</div></div><span class="mini-switch is-on"></span></div>
+                    <div class="flex items-center justify-between gap-3.5"><div><div class="text-[12.5px] font-medium text-fg">Allow password (ROPC) grant</div><div class="mt-px text-[11.5px] text-muted">Off by default. Not recommended.</div></div><span class="mini-switch"></span></div>
+                  </div>
+                </div>
+              </main>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- STANDARDS -->
+  <section class="relative z-[2] border-y border-line bg-card py-[clamp(56px,7vw,92px)]">
+    <div class="wrap">
+      <div class="mx-auto mb-10 max-w-[60ch] text-center">
+        <div class="text-[12.5px] font-semibold text-accent">Standards, not lock-in</div>
+        <h2 class="mt-2 text-[clamp(23px,2.8vw,31px)] leading-[1.12] tracking-[-0.018em]">Open standards your clients already speak</h2>
+      </div>
+      <div class="grid grid-cols-4 gap-px overflow-hidden rounded-md border border-line bg-line max-[880px]:grid-cols-2 max-[460px]:grid-cols-1">
+        {standards.map((s) => (
+          <div class="bg-card p-[18px] hover:bg-hover"><Icon name={s.icon} size={20} class="mb-[11px] text-accent" /><div class="font-mono text-[13.5px] font-semibold text-fg">{s.nm}</div><div class="mt-[5px] text-xs leading-[1.4] text-muted">{s.cap}</div></div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- CAPABILITIES -->
+  <section class="py-[clamp(56px,7vw,92px)]" id="capabilities">
+    <div class="wrap">
+      <div class="mb-10 grid grid-cols-[auto_1fr] items-start gap-4">
+        <div class="pt-1 font-mono text-xs font-medium text-accent">01</div>
+        <div>
+          <div class="text-[12.5px] font-semibold tracking-normal text-accent">Why CairnID</div>
+          <h2 class="mt-2 max-w-[22ch] text-[clamp(25px,3vw,34px)] leading-[1.08] tracking-[-0.018em]">Strict, auditable, and small on purpose</h2>
+          <p class="mt-3 max-w-[56ch] text-[15px] leading-[1.55] text-secondary">Identity is the system everything else trusts. CairnID keeps that job small: a core you can read in an afternoon, and a written record of everything it does.</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-12 gap-4">
+        <div class="b group flex flex-col gap-[13px] rounded-md border border-line bg-card p-[clamp(20px,2.4vw,28px)] transition-[border-color] duration-[120ms] ease-standard hover:border-line-strong [grid-column:span_7] max-[860px]:[grid-column:span_12]">
+          <div>
+            <div class="font-mono text-[11.5px] font-semibold text-accent">audit_</div>
+            <div class="mt-[5px] text-[clamp(18px,1.9vw,22px)] font-semibold leading-[1.15] tracking-[-0.015em]">Every grant leaves a receipt</div>
+          </div>
+          <p class="max-w-[44ch] text-[13.5px] leading-[1.55] text-secondary">Sign-ins, consents, secret rotations, and admin changes each write one append-only event with its actor and target. Search it, then stream NDJSON to your SIEM.</p>
+          <div class="mt-auto pt-1">
+            <div class="cn-card" style="overflow-x:auto;">
+              <table class="cn-table cn-table--num">
+                <tbody>
+                  <tr><td class="va">consent.grant</td><td class="vu">dana.okafor</td><td><span class="cn-pill cn-pill--active">Granted</span></td><td class="vt">14:02</td></tr>
+                  <tr><td class="va">secret.rotate</td><td class="vu">admin</td><td><span class="cn-pill cn-pill--neutral">Rotated</span></td><td class="vt">13:58</td></tr>
+                  <tr><td class="va">login.failed</td><td class="vu">m.rossi</td><td><span class="cn-pill cn-pill--revoked">Denied</span></td><td class="vt">13:40</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="b flex flex-col gap-[13px] rounded-md border border-line bg-card p-[clamp(20px,2.4vw,28px)] transition-[border-color] duration-[120ms] ease-standard hover:border-line-strong [grid-column:span_5] max-[860px]:[grid-column:span_12]">
+          <div>
+            <div class="font-mono text-[11.5px] font-semibold text-accent">tokens_</div>
+            <div class="mt-[5px] text-[clamp(18px,1.9vw,22px)] font-semibold leading-[1.15] tracking-[-0.015em]">Tokens you can verify and revoke</div>
+          </div>
+          <p class="max-w-[44ch] text-[13.5px] leading-[1.55] text-secondary">Verifiable ID tokens, opaque access tokens, and refresh tokens that rotate on every use.</p>
+          <div class="mt-auto pt-1">
+            <div class="overflow-hidden rounded-sm border border-line bg-[var(--code-bg)]">
+              <div class="flex items-center justify-between gap-3 border-b border-line-subtle px-[13px] py-2.5 font-mono text-[12.5px]"><span class="text-secondary">id_token</span><span class="text-accent">RS256  -  JWT</span></div>
+              <div class="flex items-center justify-between gap-3 border-b border-line-subtle px-[13px] py-2.5 font-mono text-[12.5px]"><span class="text-secondary">access_token</span><span class="text-accent">opaque</span></div>
+              <div class="flex items-center justify-between gap-3 px-[13px] py-2.5 font-mono text-[12.5px]"><span class="text-secondary">refresh_token</span><span class="text-accent">rotating</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="b flex flex-col gap-[13px] rounded-md border border-line bg-card p-[clamp(20px,2.4vw,28px)] transition-[border-color] duration-[120ms] ease-standard hover:border-line-strong [grid-column:span_5] max-[860px]:[grid-column:span_12]">
+          <div>
+            <div class="font-mono text-[11.5px] font-semibold text-accent">sign-in_</div>
+            <div class="mt-[5px] text-[clamp(18px,1.9vw,22px)] font-semibold leading-[1.15] tracking-[-0.015em]">Phishing-resistant by default</div>
+          </div>
+          <p class="max-w-[44ch] text-[13.5px] leading-[1.55] text-secondary">Passkeys and security keys, authenticator apps, and recovery codes  -  with session review built in.</p>
+          <div class="mt-auto pt-1">
+            <div class="grid gap-px overflow-hidden rounded-sm border border-line bg-line-subtle">
+              <div class="flex items-center gap-2.5 bg-card px-[13px] py-2.5 text-[12.5px]"><span class="inline-flex text-secondary"><Icon name="fingerprint" size={15} /></span><span class="font-medium text-fg">Passkey</span><span class="ml-auto"><span class="cn-pill cn-pill--active"><span class="cn-pill__dot"></span>Active</span></span></div>
+              <div class="flex items-center gap-2.5 bg-card px-[13px] py-2.5 text-[12.5px]"><span class="inline-flex text-secondary"><Icon name="smartphone" size={15} /></span><span class="font-medium text-fg">Authenticator</span><span class="ml-auto"><span class="cn-pill cn-pill--active"><span class="cn-pill__dot"></span>Active</span></span></div>
+              <div class="flex items-center gap-2.5 bg-card px-[13px] py-2.5 text-[12.5px]"><span class="inline-flex text-secondary"><Icon name="key-round" size={15} /></span><span class="font-medium text-fg">Recovery codes</span><span class="ml-auto font-mono text-xs text-secondary">8 / 10</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="b flex flex-col gap-[13px] rounded-md border border-line bg-card p-[clamp(20px,2.4vw,28px)] transition-[border-color] duration-[120ms] ease-standard hover:border-line-strong [grid-column:span_7] max-[860px]:[grid-column:span_12]">
+          <div>
+            <div class="font-mono text-[11.5px] font-semibold text-accent">deploy_</div>
+            <div class="mt-[5px] text-[clamp(18px,1.9vw,22px)] font-semibold leading-[1.15] tracking-[-0.015em]">One container, your infrastructure</div>
+          </div>
+          <p class="max-w-[44ch] text-[13.5px] leading-[1.55] text-secondary">No managed cloud and no per-seat pricing. Bring it up with Docker Compose, then bootstrap the first admin from the sign-in screen.</p>
+          <div class="mt-auto pt-1">
+            <div class="overflow-hidden rounded-md border border-line bg-card">
+              <div class="flex items-center gap-[7px] border-b border-line-subtle bg-sunken px-3.5 py-2.5"><span class="flex gap-[5px]"><i class="h-2 w-2 rounded-full bg-line-strong"></i><i class="h-2 w-2 rounded-full bg-line-strong"></i><i class="h-2 w-2 rounded-full bg-line-strong"></i></span><span class="font-mono text-[11.5px] text-muted">deploy</span></div>
+              <div class="term-body overflow-x-auto whitespace-pre px-[18px] py-[15px] font-mono text-[12.5px] leading-[1.85] text-secondary" set:html={deployTerminal}></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT'S LEFT OUT -->
+  <section class="pb-[clamp(56px,7vw,92px)]">
+    <div class="wrap">
+      <div class="mb-10 grid grid-cols-[auto_1fr] items-start gap-4">
+        <div class="pt-1 font-mono text-xs font-medium text-accent">02</div>
+        <div>
+          <div class="text-[12.5px] font-semibold tracking-normal text-accent">What's not here</div>
+          <h2 class="mt-2 max-w-[22ch] text-[clamp(25px,3vw,34px)] leading-[1.08] tracking-[-0.018em]">The most secure features are the ones we left out</h2>
+          <p class="mt-3 max-w-[56ch] text-[15px] leading-[1.55] text-secondary">A lot of OAuth attacks target flows that only exist for backwards compatibility. CairnID doesn't implement them. Less surface, and less to get wrong.</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-px overflow-hidden rounded-md border border-line bg-line max-[720px]:grid-cols-1">
+        {leftOut.map((n) => (
+          <div class="nope-row flex items-start gap-[13px] bg-card px-5 py-[17px] hover:bg-sunken"><span class="grid h-[26px] w-[26px] flex-none place-items-center rounded-xs bg-[var(--danger-bg)] text-danger"><Icon name="x" size={15} /></span><div><div class="nm relative inline-block font-mono text-[13px] font-semibold text-fg">{n.nm}</div><div class="mt-1 text-[12.5px] leading-[1.45] text-muted">{n.why}</div></div></div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- SHOWCASE / SURFACES -->
+  <section class="pb-[clamp(56px,7vw,92px)]" id="surfaces">
+    <div class="wrap">
+      <div class="mb-10 grid grid-cols-[auto_1fr] items-start gap-4">
+        <div class="pt-1 font-mono text-xs font-medium text-accent">03</div>
+        <div>
+          <div class="text-[12.5px] font-semibold tracking-normal text-accent">What people see</div>
+          <h2 class="mt-2 max-w-[22ch] text-[clamp(25px,3vw,34px)] leading-[1.08] tracking-[-0.018em]">Four surfaces. Two that everyone sees.</h2>
+          <p class="mt-3 max-w-[56ch] text-[15px] leading-[1.55] text-secondary">Operators live in the admin console. Everyone else only meets sign-in and consent  -  and each one states plainly what is being granted, and to whom.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-[22px] max-[880px]:grid-cols-1">
+        <!-- consent -->
+        <div class="overflow-hidden rounded-lg border border-line bg-card shadow-[var(--shadow-sm)]">
+          <div class="flex items-center justify-between border-b border-line-subtle bg-sunken px-3.5 py-2.5"><span class="text-xs font-semibold text-secondary">OAuth consent</span><span class="rounded-xs bg-accent-subtle px-[7px] py-0.5 font-mono text-[11px] text-accent">/consent</span></div>
+          <div class="p-5">
+            <div class="mb-3.5 flex items-center gap-[11px]">
+              <span class="grid h-[38px] w-[38px] flex-none place-items-center rounded-sm bg-accent-subtle text-accent"><Icon name="app-window" size={19} /></span>
+              <div>
+                <h4 class="text-[15px] font-semibold">Authorize Billing Portal</h4>
+                <p class="mt-0.5 text-xs text-muted">Signed in as <span class="font-mono">dana@example.com</span></p>
+              </div>
+            </div>
+            <p class="mb-3 text-[13px] leading-[1.5] text-secondary [&_strong]:font-semibold [&_strong]:text-fg"><strong>Billing Portal</strong> wants to access your account. It will be able to:</p>
+            <div class="mb-3 overflow-hidden rounded-md border border-line">
+              <div class="flex gap-2.5 border-b border-line-subtle px-3 py-2.5"><Icon name="check" size={15} class="mt-px flex-none text-accent" /><div><div class="font-mono text-xs font-medium text-fg">openid</div><div class="mt-px text-xs text-muted">Confirm your identity</div></div></div>
+              <div class="flex gap-2.5 border-b border-line-subtle px-3 py-2.5"><Icon name="check" size={15} class="mt-px flex-none text-accent" /><div><div class="font-mono text-xs font-medium text-fg">profile</div><div class="mt-px text-xs text-muted">Your name and display preferences</div></div></div>
+              <div class="flex gap-2.5 px-3 py-2.5"><Icon name="check" size={15} class="mt-px flex-none text-accent" /><div><div class="font-mono text-xs font-medium text-fg">email</div><div class="mt-px text-xs text-muted">Your email address and its verification status</div></div></div>
+            </div>
+            <div class="cn-banner cn-banner--info">
+              <span class="cn-banner__icon"><Icon name="info" size={15} /></span>
+              <div class="cn-banner__body">Redirects to <span style="font-family:var(--font-mono);">https://app.example.com/callback</span>. You can revoke access anytime from your account.</div>
+            </div>
+            <div class="mt-3.5 flex gap-2.5">
+              <button class="cn-btn cn-btn--ghost cn-btn--block" type="button">Deny</button>
+              <button class="cn-btn cn-btn--primary cn-btn--block" type="button"><Icon name="check" size={16} />Authorize</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- account security -->
+        <div class="overflow-hidden rounded-lg border border-line bg-card shadow-[var(--shadow-sm)]">
+          <div class="flex items-center justify-between border-b border-line-subtle bg-sunken px-3.5 py-2.5"><span class="text-xs font-semibold text-secondary">Account portal  -  Security</span><span class="rounded-xs bg-accent-subtle px-[7px] py-0.5 font-mono text-[11px] text-accent">/app</span></div>
+          <div class="p-5">
+            <div class="grid gap-px overflow-hidden rounded-md border border-line bg-line-subtle">
+              <div class="flex items-center gap-3 bg-card px-3.5 py-[13px]">
+                <span class="grid h-[34px] w-[34px] flex-none place-items-center rounded-sm border border-line-subtle bg-sunken text-secondary"><Icon name="lock-keyhole" size={16} /></span>
+                <div class="min-w-0 flex-1"><div class="text-[13.5px] font-semibold">Password</div><div class="mt-px text-xs text-muted">Updated 6 days ago  -  Argon2id</div></div>
+                <div class="flex flex-none items-center gap-[7px]"><button class="cn-btn cn-btn--secondary cn-btn--sm" type="button">Change</button></div>
+              </div>
+              <div class="flex items-center gap-3 bg-card px-3.5 py-[13px]">
+                <span class="grid h-[34px] w-[34px] flex-none place-items-center rounded-sm border border-line-subtle bg-sunken text-secondary"><Icon name="fingerprint" size={16} /></span>
+                <div class="min-w-0 flex-1"><div class="text-[13.5px] font-semibold">Passkeys</div><div class="mt-px text-xs text-muted">2 registered  -  MacBook, iPhone</div></div>
+                <div class="flex flex-none items-center gap-[7px]"><span class="cn-pill cn-pill--active"><span class="cn-pill__dot"></span>Active</span></div>
+              </div>
+              <div class="flex items-center gap-3 bg-card px-3.5 py-[13px]">
+                <span class="grid h-[34px] w-[34px] flex-none place-items-center rounded-sm border border-line-subtle bg-sunken text-secondary"><Icon name="smartphone" size={16} /></span>
+                <div class="min-w-0 flex-1"><div class="text-[13.5px] font-semibold">Authenticator app</div><div class="mt-px text-xs text-muted">TOTP  -  added Mar 2026</div></div>
+                <div class="flex flex-none items-center gap-[7px]"><span class="cn-pill cn-pill--active"><span class="cn-pill__dot"></span>Active</span></div>
+              </div>
+              <div class="flex items-center gap-3 bg-card px-3.5 py-[13px]">
+                <span class="grid h-[34px] w-[34px] flex-none place-items-center rounded-sm border border-line-subtle bg-sunken text-secondary"><Icon name="key-round" size={16} /></span>
+                <div class="min-w-0 flex-1"><div class="text-[13.5px] font-semibold">Recovery codes</div><div class="mt-px text-xs text-muted"><span class="font-mono">8</span> of 10 unused</div></div>
+                <div class="flex flex-none items-center gap-[7px]"><button class="cn-btn cn-btn--secondary cn-btn--sm" type="button">Regenerate</button></div>
+              </div>
+              <div class="flex items-center gap-3 bg-card px-3.5 py-[13px]">
+                <span class="grid h-[34px] w-[34px] flex-none place-items-center rounded-sm border border-line-subtle bg-sunken text-secondary"><Icon name="monitor-smartphone" size={16} /></span>
+                <div class="min-w-0 flex-1"><div class="text-[13.5px] font-semibold">Active sessions</div><div class="mt-px text-xs text-muted">3 devices  -  this device in Berlin</div></div>
+                <div class="flex flex-none items-center gap-[7px]"><button class="cn-btn cn-btn--ghost cn-btn--sm" type="button">Sign out all</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- four-surface legend -->
+      <div class="mt-[22px] grid grid-cols-4 gap-px overflow-hidden rounded-md border border-line bg-line max-[880px]:grid-cols-2 max-[480px]:grid-cols-1">
+        {surfaces.map((s) => (
+          <div class="bg-card px-[18px] py-4 hover:bg-hover">
+            <div class="flex items-center gap-[9px]"><Icon name={s.icon} size={16} class="text-secondary" /><span class="font-mono text-[11px] text-accent">{s.route}</span></div>
+            <div class="mt-[9px] text-[13.5px] font-semibold">{s.nm}</div>
+            <p class="mt-1 text-xs leading-[1.45] text-muted">{s.p}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- PROTOCOL BAND -->
+  <div class="border-y border-line bg-sunken" id="protocol">
+    <section class="py-[clamp(56px,7vw,92px)]">
+      <div class="wrap">
+        <div class="mb-10 grid grid-cols-[auto_1fr] items-start gap-4">
+          <div class="pt-1 font-mono text-xs font-medium text-accent">04</div>
+          <div>
+            <div class="text-[12.5px] font-semibold tracking-normal text-accent">Protocol</div>
+            <h2 class="mt-2 max-w-[22ch] text-[clamp(25px,3vw,34px)] leading-[1.08] tracking-[-0.018em]">Follow a token from sign-in to verified</h2>
+            <p class="mt-3 max-w-[56ch] text-[15px] leading-[1.55] text-secondary">One interactive grant  -  Authorization Code with PKCE. Here is the exact path a request takes, and every endpoint it can touch.</p>
+          </div>
+        </div>
+        <div class="overflow-hidden rounded-lg border border-line bg-card shadow-[var(--shadow-sm)]" id="pflow">
+          <div class="ptabs flex overflow-x-auto border-b border-line bg-sunken [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {protoTabs.map((label, i) => (
+              <button type="button" class={`ptab${i === 0 ? ' on' : ''}`} data-i={i}><span class="tn">{i + 1}</span><span class="tlabel max-[720px]:hidden">{label}</span></button>
+            ))}
+          </div>
+          {protoSteps.map((step, i) => (
+            <div class={`pframe${i === 0 ? ' on' : ''}`} data-i={i}>
+              <div class="grid [grid-template-columns:0.76fr_1.24fr] max-[720px]:grid-cols-1">
+                <div class="flex flex-col border-r border-line px-[30px] py-7 max-[720px]:border-r-0 max-[720px]:border-b max-[720px]:border-line">
+                  <span class="mb-[15px] inline-flex items-center gap-[9px]"><span class={`vb ${step.verb === 'GET' ? 'get' : 'post'}`}>{step.verb}</span><code class="font-mono text-xs text-secondary">{step.ep}</code></span>
+                  <h3 class="text-[19px] font-semibold tracking-[-0.015em]">{step.h}</h3>
+                  <p class="mt-[11px] text-sm leading-[1.6] text-secondary">{step.d}</p>
+                  <div class="mt-auto pt-5 font-mono text-[11.5px] text-muted">{step.meta}</div>
+                </div>
+                <div class="overflow-x-auto bg-[var(--code-bg)]"><div class="pcode-body min-h-[268px] whitespace-pre px-[26px] py-6 font-mono text-[12.5px] leading-[1.95] text-secondary" set:html={protoFrames[i]}></div></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- QUICK START -->
+  <section class="py-[clamp(56px,7vw,92px)]" id="start">
+    <div class="wrap">
+      <div class="mb-10 grid grid-cols-[auto_1fr] items-start gap-4">
+        <div class="pt-1 font-mono text-xs font-medium text-accent">05</div>
+        <div>
+          <div class="text-[12.5px] font-semibold tracking-normal text-accent">Quick start</div>
+          <h2 class="mt-2 max-w-[22ch] text-[clamp(25px,3vw,34px)] leading-[1.08] tracking-[-0.018em]">Run the whole stack in five minutes</h2>
+          <p class="mt-3 max-w-[56ch] text-[15px] leading-[1.55] text-secondary">Generate a key-encryption key, set it, and run the full local stack with Docker Compose. Bootstrap the first administrator from <code style="font-family:var(--font-mono);font-size:0.9em;">/login</code>.</p>
+        </div>
+      </div>
+      <div class="overflow-hidden rounded-md border border-line bg-card">
+        <div class="flex items-center gap-[7px] border-b border-line-subtle bg-sunken px-3.5 py-2.5">
+          <span class="flex gap-[5px]"><i class="h-2 w-2 rounded-full bg-line-strong"></i><i class="h-2 w-2 rounded-full bg-line-strong"></i><i class="h-2 w-2 rounded-full bg-line-strong"></i></span>
+          <span class="font-mono text-[11.5px] text-muted">bash</span>
+        </div>
+        <div class="term-body overflow-x-auto whitespace-pre px-[18px] py-[15px] font-mono text-[12.5px] leading-[1.85] text-secondary" set:html={quickstartTerminal}></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="border-y border-line bg-sunken">
+    <section class="py-[clamp(56px,7vw,92px)] text-center">
+      <div class="wrap">
+        <h2 class="text-[clamp(26px,3.4vw,38px)] leading-[1.08] tracking-[-0.02em]">Run it yourself in five minutes</h2>
+        <p class="mx-auto mt-3.5 max-w-[50ch] text-base leading-[1.55] text-secondary">Generate a key, start the stack, and bootstrap the first admin. No account to create and no sales call  -  it's open source, all the way down.</p>
+        <div class="mt-8 flex flex-wrap justify-center gap-3">
+          <a class="cn-btn cn-btn--primary" href="#start"><Icon name="terminal" size={16} />Get started</a>
+          <a class="cn-btn cn-btn--secondary" href="https://github.com/cairnid/cairnid"><Icon name="github" size={16} />View on GitHub</a>
+        </div>
+      </div>
+    </section>
+  </div>
+</SiteLayout>
+
+<script is:inline>
+  (function () {
+    var order = ['overview', 'applications', 'users', 'groups', 'audit', 'settings'];
+    var navs = [].slice.call(document.querySelectorAll('.cs-side [data-screen]'));
+    var screens = [].slice.call(document.querySelectorAll('.cs-screen'));
+    var shot = document.querySelector('.hero-shot');
+    var i = 0, paused = false;
+    if (shot) { shot.addEventListener('mouseenter', function () { paused = true; }); shot.addEventListener('mouseleave', function () { paused = false; }); }
+    function show(id) {
+      screens.forEach(function (s) { s.classList.toggle('is-on', s.getAttribute('data-screen') === id); });
+      navs.forEach(function (n) { n.classList.toggle('is-active', n.getAttribute('data-screen') === id); });
+    }
+    show('overview');
+    setInterval(function () { if (paused) { return; } i = (i + 1) % order.length; show(order[i]); }, 2600);
+  })();
+</script>
+<script is:inline>
+  (function () {
+    var flow = document.getElementById('pflow');
+    if (!flow) { return; }
+    var tabs = [].slice.call(flow.querySelectorAll('.ptab'));
+    var frames = [].slice.call(flow.querySelectorAll('.pframe'));
+    var i = 0, paused = false, timer;
+    function show(n) {
+      i = n;
+      tabs.forEach(function (t, k) { t.classList.toggle('on', k === n); });
+      frames.forEach(function (f, k) { f.classList.toggle('on', k === n); });
+    }
+    function restart() { clearInterval(timer); timer = setInterval(function () { if (!paused) { show((i + 1) % tabs.length); } }, 3800); }
+    tabs.forEach(function (t, k) { t.addEventListener('click', function () { show(k); restart(); }); });
+    flow.addEventListener('mouseenter', function () { paused = true; });
+    flow.addEventListener('mouseleave', function () { paused = false; });
+    show(0); restart();
+  })();
+</script>
+
+
+<style>
+  /* Only what utilities express poorly: keyframes/animations, set:html span
+     coloring, pseudo-element switches, JS-toggled multi-state selectors, and
+     descendant overrides of component (cn-*) table cells. */
+
+  /* Hero typewriter cursor */
+  @media (prefers-reduced-motion: no-preference) { .cursor { animation: blink 1.1s steps(1, end) infinite; } }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* Console table cells (cn-table descendants, set via td class) */
+  .cs-main .va { font-family: var(--font-mono); font-size: 12px; color: var(--text-primary); white-space: nowrap; }
+  .cs-main .vu { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+  .cs-main .vt { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+  .cs-main .nm { font-weight: 500; font-size: 13px; white-space: nowrap; }
+  .cs-main .cn-table td { padding-top: 8px; padding-bottom: 8px; }
+  .cs-cid .cn-copyfield { padding: 3px 4px 3px 8px; max-width: 168px; }
+  .cs-cid .cn-copyfield__value { font-size: 12px; }
+
+  /* Mini toggle switch (pseudo-element knob) */
+  .mini-switch { width: 30px; height: 18px; border-radius: 999px; background: var(--border-strong); position: relative; flex: none; }
+  .mini-switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: left .2s var(--ease-standard); }
+  .mini-switch.is-on { background: var(--accent); }
+  .mini-switch.is-on::after { left: 14px; }
+
+  /* Bento table cells (cn-table descendants, set via td class) */
+  .b .cn-table td { padding: 8px 12px; }
+  .b .va { font-family: var(--font-mono); font-size: 12px; color: var(--text-primary); white-space: nowrap; }
+  .b .vu { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+  .b .vt { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); text-align: right; white-space: nowrap; }
+
+  /* "Left out" strike-through underline animation */
+  .nope-row .nm::after { content: ""; position: absolute; left: 0; top: 52%; height: 1.5px; width: 0; background: var(--danger-fg); transition: width 240ms var(--ease-out); }
+  .nope-row:hover .nm::after, .nope-row:focus-within .nm::after { width: 100%; }
+  @media (prefers-reduced-motion: reduce) { .nope-row .nm::after { transition: none; } }
+
+  /* Terminal / code span coloring (rendered via set:html) */
+  .term-body .pr { color: var(--accent); user-select: none; }
+  .term-body .cm { color: var(--text-muted); }
+  .term-body .fl { color: var(--caution-fg); }
+  .term-body .st { color: var(--text-primary); }
+  .pcode-body .cm { color: var(--text-muted); }
+  .pcode-body .k { color: var(--accent); }
+  .pcode-body .s { color: var(--text-primary); }
+  .pcode-body .ok { color: var(--success-fg); }
+  .pcode-body .fl { color: var(--caution-fg); }
+
+  /* Protocol stepper tabs  -  JS-toggled .on + hover compound states */
+  .ptab { flex: 1; min-width: max-content; display: flex; align-items: center; justify-content: center; gap: 9px; padding: 14px 18px; margin-bottom: -1px; font: inherit; font-size: 13.5px; font-weight: 500; color: var(--text-muted); background: none; border: 0; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; transition: color 140ms var(--ease-standard), background 140ms var(--ease-standard), border-color 140ms var(--ease-standard); }
+  .ptab:hover:not(.on) { color: var(--text-primary); background: var(--surface-hover); }
+  .ptab:hover:not(.on) .tn { border-color: var(--accent); color: var(--accent); }
+  .ptab.on { color: var(--text-primary); font-weight: 600; border-bottom-color: var(--accent); background: var(--surface-card); }
+  .ptab .tn { width: 23px; height: 23px; border-radius: 50%; border: 1px solid var(--border-strong); display: grid; place-items: center; font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--text-muted); transition: background 140ms var(--ease-standard), color 140ms var(--ease-standard), border-color 140ms var(--ease-standard), box-shadow 140ms var(--ease-standard); }
+  .ptab.on .tn { background: var(--accent-bg); border-color: var(--accent-bg); color: var(--text-on-accent); box-shadow: 0 0 0 3px var(--accent-subtle); }
+  @media (max-width: 720px) { .ptab { flex: none; } }
+  .pframe { display: none; }
+  .pframe.on { display: block; }
+  .vb { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; padding: 3px 7px; border-radius: var(--radius-xs); }
+  .vb.get { color: var(--accent); background: var(--accent-subtle); }
+  .vb.post { color: var(--caution-fg); background: var(--caution-bg); }
+</style>

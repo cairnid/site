@@ -1,0 +1,161 @@
+﻿---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Icon from '../components/Icon.astro';
+import CairnMark from '../components/CairnMark.astro';
+import Wallpaper from '../components/Wallpaper.astro';
+---
+
+<SiteLayout
+  title="Surfaces"
+  description="The four CairnID surfaces: sign-in and bootstrap, OAuth consent, the account portal, and the admin console  -  each stating plainly what is granted, and to whom."
+  active="surfaces"
+>
+  <section class="pt-[clamp(44px,6vw,76px)] pb-[clamp(8px,2vw,20px)]">
+    <div class="wrap">
+      <div class="font-mono text-xs text-accent">Surfaces</div>
+      <h1 class="mt-3 max-w-[18ch] text-[clamp(32px,4.4vw,46px)] leading-[1.06] tracking-[-0.022em]">Four surfaces. Two that everyone sees.</h1>
+      <p class="mt-4 max-w-[56ch] text-[clamp(15px,1.6vw,17px)] leading-[1.55] text-secondary">Operators live in the admin console. Everyone else only meets sign-in and consent  -  and each one states plainly what is being granted, and to whom.</p>
+    </div>
+  </section>
+
+  <!-- SIGN-IN -->
+  <section class="border-b border-line-subtle py-[clamp(40px,5vw,64px)]" id="login">
+    <div class="wrap grid grid-cols-[0.82fr_1.18fr] items-center gap-[clamp(28px,4vw,56px)] max-[820px]:grid-cols-1">
+      <div>
+        <span class="inline-flex items-center gap-[7px] rounded-pill bg-accent-subtle px-[11px] py-1 font-mono text-xs text-accent"><Icon name="log-in" size={14} />/login</span>
+        <h2 class="mt-4 text-[clamp(22px,2.6vw,30px)] leading-[1.12] tracking-[-0.018em]">Sign-in &amp; first-admin bootstrap</h2>
+        <p class="mt-3 max-w-[46ch] text-[14.5px] leading-[1.6] text-secondary">A single centered card with the cairn mark. Password or passkey, then a second factor. The very first run bootstraps the first administrator from a setup secret  -  no seed scripts, no default credentials.</p>
+        <ul class="mt-[18px] grid list-none gap-[9px] p-0">
+          <li class="flex items-start gap-2.5 text-[13.5px] text-secondary"><Icon name="check" size={16} class="mt-px shrink-0 text-accent" />Password (Argon2id) or passkey sign-in</li>
+          <li class="flex items-start gap-2.5 text-[13.5px] text-secondary"><Icon name="check" size={16} class="mt-px shrink-0 text-accent" />TOTP and recovery-code second factors</li>
+          <li class="flex items-start gap-2.5 text-[13.5px] text-secondary"><Icon name="check" size={16} class="mt-px shrink-0 text-accent" />First-admin bootstrap gated by a setup secret</li>
+        </ul>
+      </div>
+      <div class="stage">
+        <Wallpaper variant={0} />
+        <div class="relative z-[1] w-[min(360px,100%)]">
+          <div class="mb-[18px] flex flex-col items-center gap-2.5">
+            <CairnMark size={32} />
+            <div class="text-[18px] font-bold tracking-[-0.01em] text-fg">Cairn<span class="text-accent">ID</span></div>
+          </div>
+          <div class="rounded-[4px] border border-line bg-card p-[22px] shadow-[var(--shadow-lg)]">
+            <h3 class="text-[17px]">Sign in</h3>
+            <p class="mt-[3px] mb-4 text-[12.5px] text-muted">Use your organization account.</p>
+            <div class="grid gap-3">
+              <div class="cn-field"><label class="cn-field__label">Email</label><input class="cn-input" value="dana@example.com" /></div>
+              <div class="cn-field"><label class="cn-field__label">Password</label><input class="cn-input" type="password" value="............" /></div>
+              <button class="cn-btn cn-btn--primary cn-btn--block" type="button"><Icon name="log-in" size={16} />Sign in</button>
+            </div>
+            <div class="mt-3.5 grid gap-2.5 border-t border-line-subtle pt-3.5">
+              <button class="cn-btn cn-btn--secondary cn-btn--block" type="button"><Icon name="fingerprint" size={16} />Use a passkey</button>
+            </div>
+            <div class="mt-3.5 flex justify-between text-[12.5px]"><a href="#" class="text-accent">Reset password</a><a href="#" class="text-accent">Bootstrap first admin</a></div>
+          </div>
+          <div class="mt-4 text-center text-[11.5px] text-secondary">Strict OIDC  -  RS256 ID tokens  -  exact redirect matching</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONSENT -->
+  <section class="border-b border-line-subtle py-[clamp(40px,5vw,64px)]" id="consent">
+    <div class="wrap grid grid-cols-[0.82fr_1.18fr] items-center gap-[clamp(28px,4vw,56px)] max-[820px]:grid-cols-1">
+      <div>
+        <span class="inline-flex items-center gap-[7px] rounded-pill bg-accent-subtle px-[11px] py-1 font-mono text-xs text-accent"><Icon name="app-window" size={14} />/consent</span>
+        <h2 class="mt-4 text-[clamp(22px,2.6vw,30px)] leading-[1.12] tracking-[-0.018em]">OAuth consent</h2>
+        <p class="mt-3 max-w-[46ch] text-[14.5px] leading-[1.6] text-secondary">Before an application acts on someone's behalf, the consent screen states the exact scopes, the exact redirect, and who is signed in. Granting is per-scope, and every grant can be revoked later from the account portal.</p>
+        <ul class="mt-[18px] grid list-none gap-[9px] p-0">
+          <li class="flex items-start gap-2.5 text-[13.5px] text-secondary"><Icon name="check" size={16} class="mt-px shrink-0 text-accent" />Exact scopes, described in plain language</li>
+          <li class="flex items-start gap-2.5 text-[13.5px] text-secondary"><Icon name="check" size={16} class="mt-px shrink-0 text-accent" />The exact redirect URI, shown before you approve</li>
+          <li class="flex items-start gap-2.5 text-[13.5px] text-secondary"><Icon name="check" size={16} class="mt-px shrink-0 text-accent" />Revocable any time, from your account</li>
+        </ul>
+      </div>
+      <div class="stage">
+        <Wallpaper variant={1} />
+        <div class="float-card">
+          <div class="p-[22px]">
+            <div class="mb-3.5 flex items-center gap-[11px]">
+              <span class="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-sm bg-accent-subtle text-accent"><Icon name="app-window" size={19} /></span>
+              <div><h4 class="text-[15px] font-semibold">Authorize Billing Portal</h4><p class="mt-0.5 text-xs text-muted">Signed in as <span class="font-mono">dana@example.com</span></p></div>
+            </div>
+            <p class="mb-3 text-[13px] leading-[1.5] text-secondary"><strong class="font-semibold text-fg">Billing Portal</strong> wants to access your account. It will be able to:</p>
+            <div class="mb-3 overflow-hidden rounded-md border border-line">
+              <div class="flex gap-2.5 border-b border-line-subtle px-3 py-2.5"><Icon name="check" class="mt-px h-[15px] w-[15px] shrink-0 text-accent" /><div><div class="font-mono text-xs font-medium text-fg">openid</div><div class="mt-px text-xs text-muted">Confirm your identity</div></div></div>
+              <div class="flex gap-2.5 border-b border-line-subtle px-3 py-2.5"><Icon name="check" class="mt-px h-[15px] w-[15px] shrink-0 text-accent" /><div><div class="font-mono text-xs font-medium text-fg">profile</div><div class="mt-px text-xs text-muted">Your name and display preferences</div></div></div>
+              <div class="flex gap-2.5 px-3 py-2.5"><Icon name="check" class="mt-px h-[15px] w-[15px] shrink-0 text-accent" /><div><div class="font-mono text-xs font-medium text-fg">email</div><div class="mt-px text-xs text-muted">Your email address and its verification status</div></div></div>
+            </div>
+            <div class="cn-banner cn-banner--info"><span class="cn-banner__icon"><Icon name="info" size={15} /></span><div class="cn-banner__body">Redirects to <span style="font-family:var(--font-mono);">https://app.example.com/callback</span>.</div></div>
+            <div class="mt-3.5 flex gap-2.5"><button class="cn-btn cn-btn--ghost cn-btn--block" type="button">Deny</button><button class="cn-btn cn-btn--primary cn-btn--block" type="button"><Icon name="check" size={16} />Authorize</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ACCOUNT -->
+  <section class="border-b border-line-subtle py-[clamp(40px,5vw,64px)]" id="account">
+    <div class="wrap grid grid-cols-[0.82fr_1.18fr] items-center gap-[clamp(28px,4vw,56px)] max-[820px]:grid-cols-1">
+      <div>
+        <span class="inline-flex items-center gap-[7px] rounded-pill bg-accent-subtle px-[11px] py-1 font-mono text-xs text-accent"><Icon name="user-round-cog" size={14} />/app</span>
+        <h2 class="mt-4 text-[clamp(22px,2.6vw,30px)] leading-[1.12] tracking-[-0.018em]">Account portal</h2>
+        <p class="mt-3 max-w-[46ch] text-[14.5px] leading-[1.6] text-secondary">Self-service security for end users: change a password, register passkeys, set up an authenticator, regenerate recovery codes, review live sessions, and revoke applications they previously authorized.</p>
+        <ul class="mt-[18px] grid list-none gap-[9px] p-0">
+          <li class="flex items-start gap-2.5 text-[13.5px] text-secondary"><Icon name="check" size={16} class="mt-px shrink-0 text-accent" />Passkeys, TOTP, and recovery codes</li>
+          <li class="flex items-start gap-2.5 text-[13.5px] text-secondary"><Icon name="check" size={16} class="mt-px shrink-0 text-accent" />Live session review across devices</li>
+          <li class="flex items-start gap-2.5 text-[13.5px] text-secondary"><Icon name="check" size={16} class="mt-px shrink-0 text-accent" />Authorized-application list with one-click revoke</li>
+        </ul>
+      </div>
+      <div class="stage">
+        <Wallpaper variant={2} />
+        <div class="float-card">
+          <div class="p-[22px]">
+            <div class="grid gap-px overflow-hidden rounded-md border border-line bg-line-subtle">
+              <div class="flex items-center gap-3 bg-card px-3.5 py-[13px]"><span class="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-sm border border-line-subtle bg-sunken text-secondary [&_svg]:h-4 [&_svg]:w-4"><Icon name="lock-keyhole" size={16} /></span><div class="min-w-0 flex-1"><div class="text-[13.5px] font-semibold">Password</div><div class="mt-px text-xs text-muted">Updated 6 days ago  -  Argon2id</div></div><div class="flex shrink-0 items-center gap-[7px]"><button class="cn-btn cn-btn--secondary cn-btn--sm" type="button">Change</button></div></div>
+              <div class="flex items-center gap-3 bg-card px-3.5 py-[13px]"><span class="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-sm border border-line-subtle bg-sunken text-secondary [&_svg]:h-4 [&_svg]:w-4"><Icon name="fingerprint" size={16} /></span><div class="min-w-0 flex-1"><div class="text-[13.5px] font-semibold">Passkeys</div><div class="mt-px text-xs text-muted">2 registered  -  MacBook, iPhone</div></div><div class="flex shrink-0 items-center gap-[7px]"><span class="cn-pill cn-pill--active"><span class="cn-pill__dot"></span>Active</span></div></div>
+              <div class="flex items-center gap-3 bg-card px-3.5 py-[13px]"><span class="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-sm border border-line-subtle bg-sunken text-secondary [&_svg]:h-4 [&_svg]:w-4"><Icon name="smartphone" size={16} /></span><div class="min-w-0 flex-1"><div class="text-[13.5px] font-semibold">Authenticator app</div><div class="mt-px text-xs text-muted">TOTP  -  added Mar 2026</div></div><div class="flex shrink-0 items-center gap-[7px]"><span class="cn-pill cn-pill--active"><span class="cn-pill__dot"></span>Active</span></div></div>
+              <div class="flex items-center gap-3 bg-card px-3.5 py-[13px]"><span class="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-sm border border-line-subtle bg-sunken text-secondary [&_svg]:h-4 [&_svg]:w-4"><Icon name="key-round" size={16} /></span><div class="min-w-0 flex-1"><div class="text-[13.5px] font-semibold">Recovery codes</div><div class="mt-px text-xs text-muted"><span class="font-mono">8</span> of 10 unused</div></div><div class="flex shrink-0 items-center gap-[7px]"><button class="cn-btn cn-btn--secondary cn-btn--sm" type="button">Regenerate</button></div></div>
+              <div class="flex items-center gap-3 bg-card px-3.5 py-[13px]"><span class="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-sm border border-line-subtle bg-sunken text-secondary [&_svg]:h-4 [&_svg]:w-4"><Icon name="monitor-smartphone" size={16} /></span><div class="min-w-0 flex-1"><div class="text-[13.5px] font-semibold">Active sessions</div><div class="mt-px text-xs text-muted">3 devices  -  this device in Berlin</div></div><div class="flex shrink-0 items-center gap-[7px]"><button class="cn-btn cn-btn--ghost cn-btn--sm" type="button">Sign out all</button></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ADMIN -->
+  <section class="border-b border-line-subtle py-[clamp(40px,5vw,64px)]" id="admin">
+    <div class="wrap grid grid-cols-[0.82fr_1.18fr] items-center gap-[clamp(28px,4vw,56px)] max-[820px]:grid-cols-1">
+      <div>
+        <span class="inline-flex items-center gap-[7px] rounded-pill bg-accent-subtle px-[11px] py-1 font-mono text-xs text-accent"><Icon name="layout-dashboard" size={14} />/admin</span>
+        <h2 class="mt-4 text-[clamp(22px,2.6vw,30px)] leading-[1.12] tracking-[-0.018em]">Admin console</h2>
+        <p class="mt-3 max-w-[46ch] text-[14.5px] leading-[1.6] text-secondary">Where operators live: organizations, users, groups, OIDC applications, consent policies, and the full audit log. Dense, legible tables with tabular numerals and a small, fixed set of status pills.</p>
+        <ul class="mt-[18px] grid list-none gap-[9px] p-0">
+          <li class="flex items-start gap-2.5 text-[13.5px] text-secondary"><Icon name="check" size={16} class="mt-px shrink-0 text-accent" />Register OIDC clients with exact redirect URIs</li>
+          <li class="flex items-start gap-2.5 text-[13.5px] text-secondary"><Icon name="check" size={16} class="mt-px shrink-0 text-accent" />Manage users, groups, and consent policies</li>
+          <li class="flex items-start gap-2.5 text-[13.5px] text-secondary"><Icon name="check" size={16} class="mt-px shrink-0 text-accent" />Filter the audit log and export NDJSON</li>
+        </ul>
+      </div>
+      <div class="stage stage--wide">
+        <Wallpaper variant={3} />
+        <div class="float-card console-card">
+          <div class="min-h-[300px] bg-page">
+            <main class="overflow-hidden px-5 py-[18px]">
+              <div class="mb-3.5 flex items-start justify-between gap-3"><div><h3 class="text-base font-semibold">Audit</h3><p class="mt-[3px] text-xs text-muted">Security-relevant events, newest first.</p></div><button class="cn-btn cn-btn--secondary cn-btn--sm" type="button"><Icon name="download" size={14} />Export NDJSON</button></div>
+              <div class="cn-card" style="overflow-x:auto;">
+                <table class="cn-table cn-table--num [&_td]:px-3 [&_td]:py-2">
+                  <thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Result</th></tr></thead>
+                  <tbody>
+                    <tr><td class="whitespace-nowrap font-mono text-[11px] text-muted" style="text-align:left">14:22:09</td><td class="whitespace-nowrap text-xs text-secondary">user:u_8fK2</td><td class="whitespace-nowrap font-mono text-xs text-fg">session.login</td><td><span class="cn-pill cn-pill--active"><span class="cn-pill__dot"></span>OK</span></td></tr>
+                    <tr><td class="whitespace-nowrap font-mono text-[11px] text-muted" style="text-align:left">14:18:51</td><td class="whitespace-nowrap text-xs text-secondary">user:u_3pQz</td><td class="whitespace-nowrap font-mono text-xs text-fg">secret.rotate</td><td><span class="cn-pill cn-pill--neutral">Rotated</span></td></tr>
+                    <tr><td class="whitespace-nowrap font-mono text-[11px] text-muted" style="text-align:left">14:02:14</td><td class="whitespace-nowrap text-xs text-secondary">system</td><td class="whitespace-nowrap font-mono text-xs text-fg">key.rotate</td><td><span class="cn-pill cn-pill--neutral">RS256</span></td></tr>
+                    <tr><td class="whitespace-nowrap font-mono text-[11px] text-muted" style="text-align:left">13:40:02</td><td class="whitespace-nowrap text-xs text-secondary">user:u_2Vt7</td><td class="whitespace-nowrap font-mono text-xs text-fg">login.failed</td><td><span class="cn-pill cn-pill--revoked"><span class="cn-pill__dot"></span>Denied</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </main>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</SiteLayout>

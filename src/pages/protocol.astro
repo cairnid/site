@@ -1,0 +1,171 @@
+﻿---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Icon from '../components/Icon.astro';
+
+const endpoints = [
+  { verb: 'GET', path: '/.well-known/openid-configuration', purpose: 'Discovery document for clients.' },
+  { verb: 'GET', path: '/.well-known/jwks.json', purpose: 'Public signing keys (JWKS), with rotation.' },
+  { verb: 'GET', path: '/oauth2/authorize', purpose: 'Start the Authorization Code flow with PKCE.' },
+  { verb: 'POST', path: '/oauth2/token', purpose: 'Exchange a code or refresh token for tokens.' },
+  { verb: 'GET', path: '/oauth2/userinfo', purpose: 'Claims for the authenticated subject.' },
+  { verb: 'POST', path: '/oauth2/introspect', purpose: 'Check whether an access token is active.' },
+  { verb: 'POST', path: '/oauth2/revoke', purpose: 'Revoke an access or refresh token.' },
+  { verb: 'GET', path: '/oauth2/logout', purpose: 'RP-initiated logout and session end.' },
+  { verb: 'POST', path: '/scim/v2/Users', purpose: 'Provision and update users (SCIM 2.0).' },
+];
+
+const keyfacts = [
+  { k: 'Issuer', v: 'https://id.example.com' },
+  { k: 'ID token signing', v: 'RS256' },
+  { k: 'Access token', v: 'opaque  -  introspectable' },
+  { k: 'PKCE', v: 'S256 required' },
+  { k: 'Subject identifiers', v: 'public' },
+  { k: 'Userinfo', v: 'signed + plain JSON' },
+  { k: 'Session', v: 'RP-initiated logout' },
+];
+
+// Code-block bodies  -  set:html so braces, brackets, and backslash line
+// continuations survive Astro's template parser. String.raw keeps the `\` literal.
+const discoveryCode = String.raw`<span class="c">// 200 OK  -  application/json</span>
+{
+  <span class="k">"issuer"</span>: <span class="s">"https://id.example.com"</span>,
+  <span class="k">"authorization_endpoint"</span>: <span class="s">".../oauth2/authorize"</span>,
+  <span class="k">"token_endpoint"</span>: <span class="s">".../oauth2/token"</span>,
+  <span class="k">"userinfo_endpoint"</span>: <span class="s">".../oauth2/userinfo"</span>,
+  <span class="k">"jwks_uri"</span>: <span class="s">".../.well-known/jwks.json"</span>,
+  <span class="k">"id_token_signing_alg_values_supported"</span>: [<span class="s">"RS256"</span>],
+  <span class="k">"grant_types_supported"</span>: [
+    <span class="s">"authorization_code"</span>, <span class="s">"refresh_token"</span>,
+    <span class="s">"client_credentials"</span>
+  ],
+  <span class="k">"code_challenge_methods_supported"</span>: [<span class="s">"S256"</span>]
+}`;
+
+const tokenRequest = String.raw`<span class="pr">$</span> curl -s https://id.example.com/oauth2/token \
+    <span class="fl">-d</span> grant_type=authorization_code \
+    <span class="fl">-d</span> code=$AUTH_CODE \
+    <span class="fl">-d</span> code_verifier=$PKCE_VERIFIER \
+    <span class="fl">-d</span> redirect_uri=$REDIRECT \
+    <span class="fl">-d</span> client_id=cln_7Q2f9aE4kV0pX1mB`;
+
+const tokenResponse = String.raw`<span class="c">// 200 OK</span>
+{
+  <span class="k">"token_type"</span>: <span class="s">"Bearer"</span>,
+  <span class="k">"access_token"</span>: <span class="s">"at_9x...opaque"</span>,
+  <span class="k">"id_token"</span>: <span class="s">"eyJhbGciOiJSUzI1Ni ..."</span>,
+  <span class="k">"refresh_token"</span>: <span class="s">"rt_b3...rotated"</span>,
+  <span class="k">"expires_in"</span>: <span class="s">600</span>,
+  <span class="k">"scope"</span>: <span class="s">"openid profile email"</span>
+}`;
+---
+
+<SiteLayout
+  title="Protocol"
+  description="CairnID implements OpenID Connect 1.0 and OAuth 2.1 with strict defaults and documented limits. One discovery document, a rotating JWKS, and exactly the endpoints you need."
+  active="protocol"
+>
+  <section class="border-b border-line-subtle pt-[clamp(44px,6vw,76px)] pb-[clamp(16px,2vw,28px)]">
+    <div class="wrap">
+      <div class="font-mono text-xs text-accent">Protocol</div>
+      <h1 class="mt-3 max-w-[20ch] text-[clamp(32px,4.4vw,46px)] leading-[1.06] tracking-[-0.022em]">The full OIDC surface. Nothing extra.</h1>
+      <p class="mt-4 max-w-[60ch] text-[clamp(15px,1.6vw,17px)] leading-[1.55] text-secondary">CairnID implements OpenID Connect 1.0 and OAuth 2.1 with strict defaults and documented limits. Every client starts from one discovery document and verifies tokens against a rotating JWKS.</p>
+    </div>
+  </section>
+
+  <!-- DISCOVERY -->
+  <section class="border-b border-line-subtle py-[clamp(40px,5vw,60px)]" id="discovery">
+    <div class="wrap">
+      <div class="font-mono text-xs text-accent">discovery_</div>
+      <h2 class="mt-2 text-[clamp(20px,2.4vw,27px)] tracking-[-0.018em]">One document to configure a client</h2>
+      <p class="mt-3 max-w-[60ch] text-[14.5px] leading-[1.6] text-secondary">Point any conformant client at the issuer. Everything it needs  -  endpoints, signing algorithms, supported scopes, and PKCE methods  -  comes back from a single well-known URL.</p>
+      <div class="mt-[26px] grid grid-cols-2 items-start gap-[22px] max-[820px]:grid-cols-1">
+        <div class="code overflow-hidden rounded-md border border-line bg-card">
+          <div class="flex items-center gap-[9px] border-b border-line-subtle bg-sunken px-[13px] py-[9px]"><span class="flex gap-[5px]"><i class="h-2 w-2 rounded-full bg-line-strong"></i><i class="h-2 w-2 rounded-full bg-line-strong"></i><i class="h-2 w-2 rounded-full bg-line-strong"></i></span><span class="font-mono text-[11.5px] text-muted">GET /.well-known/openid-configuration</span></div>
+          <pre class="m-0 overflow-x-auto px-[18px] py-[15px] font-mono text-[12.5px] leading-[1.8] text-secondary" set:html={discoveryCode}></pre>
+        </div>
+        <div>
+          <div class="grid gap-px overflow-hidden rounded-md border border-line bg-line-subtle">
+            {keyfacts.map((f) => (
+              <div class="flex justify-between gap-3 bg-card px-[15px] py-3 text-[13px]"><span class="text-secondary">{f.k}</span><span class="font-mono text-fg">{f.v}</span></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENDPOINTS -->
+  <section class="border-b border-line-subtle py-[clamp(40px,5vw,60px)]" id="endpoints">
+    <div class="wrap">
+      <div class="font-mono text-xs text-accent">endpoints_</div>
+      <h2 class="mt-2 text-[clamp(20px,2.4vw,27px)] tracking-[-0.018em]">Every endpoint, and what it does</h2>
+      <p class="mt-3 max-w-[60ch] text-[14.5px] leading-[1.6] text-secondary">Discovery, keys, the core authorization and token exchange, plus introspection, revocation, and logout. Nothing speculative, nothing undocumented.</p>
+      <div class="mt-[26px] overflow-x-auto rounded-md border border-line">
+        <table class="w-full border-collapse [&_tr:last-child_td]:border-b-0 [&_tr:hover_td]:bg-hover">
+          <thead><tr><th class="border-b border-line bg-sunken px-4 py-2.5 text-left text-[11px] font-semibold text-muted" style="width:90px">Method</th><th class="border-b border-line bg-sunken px-4 py-2.5 text-left text-[11px] font-semibold text-muted">Endpoint</th><th class="border-b border-line bg-sunken px-4 py-2.5 text-left text-[11px] font-semibold text-muted">Purpose</th></tr></thead>
+          <tbody>
+            {endpoints.map((e) => (
+              <tr><td class="border-b border-line-subtle px-4 py-3 align-middle text-[13px] text-secondary"><span class={`inline-block rounded-xs px-[7px] py-[3px] text-[10px] font-bold tracking-[0.04em] ${e.verb === 'GET' ? 'bg-accent-subtle text-accent' : 'bg-[var(--caution-bg)] text-caution'}`}>{e.verb}</span></td><td class="border-b border-line-subtle px-4 py-3 align-middle whitespace-nowrap font-mono text-[12.5px] text-fg">{e.path}</td><td class="border-b border-line-subtle px-4 py-3 align-middle text-[13px] text-secondary">{e.purpose}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOKEN EXCHANGE -->
+  <section class="border-b border-line-subtle py-[clamp(40px,5vw,60px)]" id="token">
+    <div class="wrap">
+      <div class="font-mono text-xs text-accent">token_exchange_</div>
+      <h2 class="mt-2 text-[clamp(20px,2.4vw,27px)] tracking-[-0.018em]">Authorization Code, with PKCE</h2>
+      <p class="mt-3 max-w-[60ch] text-[14.5px] leading-[1.6] text-secondary">The only interactive grant. The client sends its code and PKCE verifier; CairnID returns a signed ID token, an opaque access token, and a refresh token that rotates on use.</p>
+      <div class="mt-[26px] grid grid-cols-2 items-start gap-[22px] max-[820px]:grid-cols-1">
+        <div class="code overflow-hidden rounded-md border border-line bg-card">
+          <div class="flex items-center gap-[9px] border-b border-line-subtle bg-sunken px-[13px] py-[9px]"><span class="flex gap-[5px]"><i class="h-2 w-2 rounded-full bg-line-strong"></i><i class="h-2 w-2 rounded-full bg-line-strong"></i><i class="h-2 w-2 rounded-full bg-line-strong"></i></span><span class="font-mono text-[11.5px] text-muted">request</span></div>
+          <pre class="m-0 overflow-x-auto px-[18px] py-[15px] font-mono text-[12.5px] leading-[1.8] text-secondary" set:html={tokenRequest}></pre>
+        </div>
+        <div class="code overflow-hidden rounded-md border border-line bg-card">
+          <div class="flex items-center gap-[9px] border-b border-line-subtle bg-sunken px-[13px] py-[9px]"><span class="flex gap-[5px]"><i class="h-2 w-2 rounded-full bg-line-strong"></i><i class="h-2 w-2 rounded-full bg-line-strong"></i><i class="h-2 w-2 rounded-full bg-line-strong"></i></span><span class="font-mono text-[11.5px] text-muted">response</span></div>
+          <pre class="m-0 overflow-x-auto px-[18px] py-[15px] font-mono text-[12.5px] leading-[1.8] text-secondary" set:html={tokenResponse}></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GRANTS -->
+  <section class="border-b border-line-subtle py-[clamp(40px,5vw,60px)]" id="grants">
+    <div class="wrap">
+      <div class="font-mono text-xs text-accent">grants_</div>
+      <h2 class="mt-2 text-[clamp(20px,2.4vw,27px)] tracking-[-0.018em]">What's supported, and what isn't</h2>
+      <p class="mt-3 max-w-[60ch] text-[14.5px] leading-[1.6] text-secondary">Three grant types cover real applications. The legacy flows that exist only for backwards compatibility are deliberately not implemented.</p>
+      <div class="mt-[26px] grid grid-cols-2 gap-[22px] max-[820px]:grid-cols-1">
+        <div>
+          <h3 class="mb-3 flex items-center gap-2 text-sm"><span class="inline-flex text-success"><Icon name="check-circle-2" size={16} /></span>Supported</h3>
+          <div class="grid gap-px overflow-hidden rounded-md border border-line bg-line-subtle">
+            <div class="flex items-center gap-2.5 bg-card px-3.5 py-3 font-mono text-[12.5px] text-fg"><Icon name="check" size={15} class="shrink-0 text-success" />authorization_code<span class="ml-auto font-sans text-xs text-muted">+ PKCE (S256)</span></div>
+            <div class="flex items-center gap-2.5 bg-card px-3.5 py-3 font-mono text-[12.5px] text-fg"><Icon name="check" size={15} class="shrink-0 text-success" />refresh_token<span class="ml-auto font-sans text-xs text-muted">rotating</span></div>
+            <div class="flex items-center gap-2.5 bg-card px-3.5 py-3 font-mono text-[12.5px] text-fg"><Icon name="check" size={15} class="shrink-0 text-success" />client_credentials<span class="ml-auto font-sans text-xs text-muted">service-to-service</span></div>
+          </div>
+        </div>
+        <div>
+          <h3 class="mb-3 flex items-center gap-2 text-sm"><span class="inline-flex text-danger"><Icon name="x-circle" size={16} /></span>Not implemented</h3>
+          <div class="grid gap-px overflow-hidden rounded-md border border-line bg-line-subtle">
+            <div class="flex items-center gap-2.5 bg-card px-3.5 py-3 font-mono text-[12.5px] text-fg"><Icon name="x" size={15} class="shrink-0 text-danger" />implicit<span class="ml-auto font-sans text-xs text-muted">tokens in fragments</span></div>
+            <div class="flex items-center gap-2.5 bg-card px-3.5 py-3 font-mono text-[12.5px] text-fg"><Icon name="x" size={15} class="shrink-0 text-danger" />hybrid<span class="ml-auto font-sans text-xs text-muted">ambiguous</span></div>
+            <div class="flex items-center gap-2.5 bg-card px-3.5 py-3 font-mono text-[12.5px] text-fg"><Icon name="x" size={15} class="shrink-0 text-danger" />password (ROPC)<span class="ml-auto font-sans text-xs text-muted">apps see passwords</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</SiteLayout>
+
+<style>
+  /* Only the set:html code-block syntax highlighting  -  these spans are
+     injected as raw HTML strings, so they can't carry utility classes. */
+  .code .k { color: var(--accent); }
+  .code .s { color: var(--text-primary); }
+  .code .c { color: var(--text-muted); }
+  .code .pr { color: var(--accent); user-select: none; }
+  .code .fl { color: var(--caution-fg); }
+</style>

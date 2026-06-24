@@ -1,0 +1,24 @@
+---
+type Props = {
+  raised?: boolean;
+  class?: string;
+  bodyClass?: string;
+  [key: string]: unknown;
+};
+
+const {
+  raised = false,
+  class: className = '',
+  bodyClass = '',
+  ...rest
+} = Astro.props;
+
+const classes = ['cn-card', raised ? 'cn-card--raised' : '', className].filter(Boolean).join(' ');
+const hasHeader = Astro.slots.has('header');
+const hasFooter = Astro.slots.has('footer');
+---
+<section class={classes} {...rest}>
+  {hasHeader && <div class="cn-card__header"><slot name="header" /></div>}
+  <div class={`cn-card__body ${bodyClass}`.trim()}><slot /></div>
+  {hasFooter && <div class="cn-card__footer"><slot name="footer" /></div>}
+</section>

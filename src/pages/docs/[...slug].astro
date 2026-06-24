@@ -1,0 +1,33 @@
+---
+import { getCollection, render } from 'astro:content';
+import DocsLayout from '../../layouts/DocsLayout.astro';
+
+export async function getStaticPaths() {
+  const docs = await getCollection('docs');
+
+  return docs
+    .filter((doc) => doc.id !== 'index')
+    .map((doc) => ({
+      params: { slug: doc.id },
+      props: { doc, docs },
+    }));
+}
+
+const { doc, docs } = Astro.props;
+const { Content, headings } = await render(doc);
+---
+
+<DocsLayout doc={doc} docs={docs} headings={headings}>
+  <Content />
+</DocsLayout>
+
+<script>
+  for (const element of document.querySelectorAll<HTMLElement>('.markdown-body table, .markdown-body pre')) {
+    if (element.scrollWidth > element.clientWidth) {
+      element.tabIndex = 0;
+      if (!element.hasAttribute('aria-label')) {
+        element.setAttribute('aria-label', 'Scrollable documentation content');
+      }
+    }
+  }
+</script>

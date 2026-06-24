@@ -1,0 +1,85 @@
+﻿---
+/*
+ * Icon  -  the Boxicons line set via Astro Iconify (astro-icon + @iconify-json/bx,
+ * @iconify-json/bxl). SVGs are inlined at build time from the locally-installed
+ * icon sets, so the site makes no runtime request to any CDN (CairnID runs under
+ * a strict CSP). One consistent 24x24 line set inheriting currentColor.
+ *
+ * Thin wrapper that keeps a stable API  -  `name` is a bare semantic name, plus
+ * `size`, `label`, `class`  -  mapping each name to its Boxicons Iconify id below.
+ * Add new glyphs by extending the map; verify the target exists in @iconify-json/bx.
+ */
+import { Icon as Iconify } from 'astro-icon/components';
+
+const ICONS: Record<string, string> = {
+  activity: 'bx:pulse',
+  'app-window': 'bx:window-alt',
+  'arrow-right': 'bx:right-arrow-alt',
+  'badge-check': 'bx:badge-check',
+  ban: 'bx:block',
+  boxes: 'bx:cube',
+  certificate: 'bx:certification',
+  check: 'bx:check',
+  'check-circle-2': 'bx:check-circle',
+  'chevrons-up-down': 'bx:expand-vertical',
+  clock: 'bx:time-five',
+  cloud: 'bx:cloud',
+  copy: 'bx:copy',
+  'credit-card': 'bx:credit-card',
+  'database-backup': 'bx:data',
+  download: 'bx:download',
+  'ellipsis-vertical': 'bx:dots-vertical-rounded',
+  'file-text': 'bx:detail',
+  filter: 'bx:filter',
+  fingerprint: 'bx:fingerprint',
+  gauge: 'bx:tachometer',
+  'git-branch': 'bx:git-branch',
+  github: 'bxl:github',
+  globe: 'bx:globe',
+  'id-card': 'bx:id-card',
+  info: 'bx:info-circle',
+  'key-round': 'bx:key',
+  'layout-dashboard': 'bx:grid-alt',
+  'life-buoy': 'bx:buoy',
+  lock: 'bx:lock',
+  'lock-keyhole': 'bx:lock-alt',
+  'log-in': 'bx:log-in',
+  menu: 'bx:menu',
+  'monitor-smartphone': 'bx:devices',
+  moon: 'bx:moon',
+  pencil: 'bx:pencil',
+  plus: 'bx:plus',
+  'refresh-cw': 'bx:refresh',
+  'scroll-text': 'bx:receipt',
+  search: 'bx:search',
+  'search-alt': 'bx:search-alt',
+  server: 'bx:server',
+  settings: 'bx:cog',
+  shield: 'bx:shield',
+  'shield-check': 'bx:check-shield',
+  smartphone: 'bx:mobile-alt',
+  star: 'bx:star',
+  sun: 'bx:sun',
+  terminal: 'bx:terminal',
+  timer: 'bx:timer',
+  transfer: 'bx:transfer',
+  'triangle-alert': 'bx:error',
+  'user-plus': 'bx:user-plus',
+  'user-round-cog': 'bx:user-circle',
+  users: 'bx:group',
+  x: 'bx:x',
+  'x-circle': 'bx:x-circle',
+};
+
+type Props = {
+  name: string;
+  size?: number;
+  label?: string;
+  class?: string;
+};
+
+const { name, size = 18, label, class: className } = Astro.props;
+const iconId = ICONS[name] ?? 'bx:info-circle';
+const a11y = label ? { title: label } : { 'aria-hidden': true };
+---
+<Iconify name={iconId} width={size} height={size} class={className} {...a11y} />

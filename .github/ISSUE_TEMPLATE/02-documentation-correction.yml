@@ -1,0 +1,52 @@
+name: Documentation correction
+description: Report a site-only documentation typo, stale link, unclear wording, or content correction.
+title: "[Docs]: "
+labels: ["site", "documentation", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form only for corrections to the standalone site documentation.
+
+        Do not include secrets, tokens, keys, private deployment data, sensitive logs, or exploit details.
+        Do not report vulnerabilities publicly. Follow SECURITY.md instead.
+        Product runtime, authentication, API, deployment, and operator reports belong in the published product repository or organization process for that component, not in this site repo.
+  - type: input
+    id: affected-doc
+    attributes:
+      label: Affected page or file
+      description: Name the public documentation page or site file that needs correction.
+    validations:
+      required: true
+  - type: textarea
+    id: correction
+    attributes:
+      label: What should change?
+      description: Describe the correction and why the current text is wrong, stale, or unclear.
+    validations:
+      required: true
+  - type: textarea
+    id: suggested-wording
+    attributes:
+      label: Suggested wording
+      description: If you have exact replacement text, include it here.
+    validations:
+      required: false
+  - type: dropdown
+    id: scope-check
+    attributes:
+      label: Scope check
+      description: Confirm this is site documentation only.
+      options:
+        - Site documentation only
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I have not included secrets, tokens, keys, sensitive logs, private deployment data, or vulnerability details.
+          required: true
+        - label: This is not a product/runtime support request or a public vulnerability report.
+          required: true

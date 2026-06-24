@@ -1,0 +1,21 @@
+---
+type Props = {
+  tone?: 'active' | 'revoked' | 'disabled' | 'neutral';
+  dot?: boolean;
+  class?: string;
+  [key: string]: unknown;
+};
+
+const {
+  tone = 'neutral',
+  dot = false,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const classes = ['cn-pill', `cn-pill--${tone}`, className].filter(Boolean).join(' ');
+---
+<span class={classes} {...rest}>
+  {dot && <span class="cn-pill__dot"></span>}
+  <slot />
+</span>

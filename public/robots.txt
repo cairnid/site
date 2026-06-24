@@ -1,0 +1,8 @@
+# CairnID — https://cairnid.com
+# Repo-owned crawl policy (replaces the Cloudflare-managed default). All public
+# pages are indexable; the on-page <meta name="robots"> handles any exceptions.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://cairnid.com/sitemap-index.xml

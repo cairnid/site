@@ -1,0 +1,621 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import Icon from '../../components/Icon.astro';
+import CairnMark from '../../components/CairnMark.astro';
+import Banner from '../../components/ui/Banner.astro';
+import Button from '../../components/ui/Button.astro';
+import Card from '../../components/ui/Card.astro';
+import Chip from '../../components/ui/Chip.astro';
+import IconButton from '../../components/ui/IconButton.astro';
+import Pill from '../../components/ui/Pill.astro';
+
+const stoneScale = [
+  { n: '0', hex: '#ffffff' }, { n: '25', hex: '#faf8f3' }, { n: '50', hex: '#f4f1ea' },
+  { n: '100', hex: '#ece7dd' }, { n: '150', hex: '#e2dccf' }, { n: '200', hex: '#d4cdbd' },
+  { n: '300', hex: '#bbb2a0' }, { n: '400', hex: '#97907f' }, { n: '500', hex: '#756e5f' },
+  { n: '600', hex: '#585143' }, { n: '900', hex: '#1b1813' },
+];
+const tealScale = [
+  { n: '50', hex: '#e3f1ec' }, { n: '100', hex: '#c4e3da' }, { n: '200', hex: '#93ccbc' },
+  { n: '300', hex: '#4fb29a' }, { n: '400', hex: '#1ea487' }, { n: '500', hex: '#12876f' },
+  { n: '600', hex: '#0c6052' }, { n: '700', hex: '#094a3f' },
+];
+const spacing = [
+  ['1', '4px'], ['2', '8px'], ['3', '12px'], ['4', '16px'],
+  ['5', '20px'], ['6', '24px'], ['7', '32px'], ['8', '40px'],
+];
+const iconNames = [
+  'activity', 'app-window', 'arrow-right', 'badge-check', 'ban', 'boxes', 'check', 'check-circle-2',
+  'chevrons-up-down', 'cloud', 'copy', 'credit-card', 'database-backup', 'download', 'ellipsis-vertical',
+  'file-text', 'filter', 'fingerprint', 'gauge', 'git-branch', 'github', 'globe', 'info', 'key-round',
+  'layout-dashboard', 'life-buoy', 'lock', 'lock-keyhole', 'log-in', 'monitor-smartphone', 'moon',
+  'pencil', 'plus', 'refresh-cw', 'scroll-text', 'search', 'server', 'settings', 'shield', 'shield-check',
+  'smartphone', 'sun', 'terminal', 'timer', 'triangle-alert', 'user-plus', 'user-round-cog', 'users',
+  'x', 'x-circle',
+];
+const tabs = [
+  { id: 'sessions', label: 'Sessions' },
+  { id: 'apps', label: 'Authorized apps' },
+  { id: 'mfa', label: 'Two-factor' },
+  { id: 'recovery', label: 'Recovery codes' },
+];
+---
+
+<SiteLayout
+  title="Design system"
+  description="The CairnID design system, built in Astro: brand, color, type, spacing, and the cn- component library - warm granite neutrals, one teal accent, Archivo + JetBrains Mono."
+>
+  <section class="ui-head">
+    <div class="wrap">
+      <div class="eyebrow">Design system</div>
+      <h1>The instrument, documented</h1>
+      <p>Every token and component CairnID is built from - warm granite neutrals, one teal accent, Archivo for everything human-readable, and JetBrains Mono for machine values. Calm, exact, trustworthy. Toggle the theme in the masthead to see both modes.</p>
+    </div>
+  </section>
+
+  <div class="wrap ui-body">
+    <!-- ============ BRAND ============ -->
+    <section class="ui-section" id="brand">
+      <div class="ui-section__title"><span class="no">01</span>Brand</div>
+      <div class="spec-card">
+        <div class="spec-card__head"><div class="nm">Logo &amp; wordmark</div><div class="sub">Cairn mark + Archivo wordmark, light and dark</div></div>
+        <div class="spec-card__demo brand-demo">
+          <div class="brand-cell light">
+            <div class="lockup"><CairnMark size={38} /><span class="word">Cairn<span class="id">ID</span></span></div>
+          </div>
+          <div class="brand-cell dark theme-dark">
+            <div class="lockup"><CairnMark size={38} /><div><span class="word">Cairn<span class="id">ID</span></span><span class="brand-tag">Strict OIDC. Clear operations.</span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ COLOR ============ -->
+    <section class="ui-section" id="color">
+      <div class="ui-section__title"><span class="no">02</span>Color</div>
+
+      <div class="spec-card">
+        <div class="spec-card__head"><div class="nm">Granite neutrals</div><div class="sub">Warm stone grays carry ~90% of the UI</div></div>
+        <div class="spec-card__demo card-bg">
+          <div class="scale scale--11">
+            {stoneScale.map((s) => (
+              <div class="sw"><div class="chip" style={`background:${s.hex}`}></div><div class="name">{s.n}</div><div class="hex">{s.hex}</div></div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <div class="spec-card__head"><div class="nm">Teal accent - the cairn</div><div class="sub">One accent. Used sparingly, it always means act here.</div></div>
+        <div class="spec-card__demo card-bg">
+          <div class="scale scale--8">
+            {tealScale.map((s) => (
+              <div class="sw"><div class="chip" style={`background:${s.hex}`}></div><div class="name">{s.n}</div><div class="hex">{s.hex}</div></div>
+            ))}
+          </div>
+          <div class="accent-use">
+            <Button variant="primary" size="sm">Approve</Button>
+            <a class="accent-link" href="#color">Review consent</a>
+            <span class="note">600 fills primary actions - 400 brightens for dark mode &amp; focus</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <div class="spec-card__head"><div class="nm">Semantic state</div><div class="sub">Color only for real state - success, caution, danger</div></div>
+        <div class="spec-card__demo card-bg">
+          <div class="sem-grid">
+            <div class="sem s"><h4>Success</h4><p>Passkey enrolled. Recovery codes regenerated.</p></div>
+            <div class="sem c"><h4>Caution</h4><p>This action signs out every active session.</p></div>
+            <div class="sem d"><h4>Danger</h4><p>Disabling revokes all issued tokens. This cannot be undone.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <div class="spec-card__head"><div class="nm">Surfaces - light &amp; dark</div><div class="sub">Both themes warm; dark is charcoal granite, never pure black</div></div>
+        <div class="spec-card__demo surf-demo">
+          <div class="surf-pane light">
+            <div class="surf-lbl">Light</div>
+            <div class="surf-stack">
+              <div class="surf-row"><span class="surf-box" style="background:var(--stone-25)"></span><span class="surf-nm">page</span></div>
+              <div class="surf-row"><span class="surf-box" style="background:var(--stone-0)"></span><span class="surf-nm">card</span></div>
+              <div class="surf-row"><span class="surf-box" style="background:var(--stone-50)"></span><span class="surf-nm">sunken</span></div>
+              <div class="surf-row"><span class="surf-box" style="background:#eef4f1"></span><span class="surf-nm">selected</span></div>
+            </div>
+          </div>
+          <div class="surf-pane dark theme-dark">
+            <div class="surf-lbl">Dark</div>
+            <div class="surf-stack">
+              <div class="surf-row"><span class="surf-box" style="background:var(--surface-page)"></span><span class="surf-nm">page</span></div>
+              <div class="surf-row"><span class="surf-box" style="background:var(--surface-card)"></span><span class="surf-nm">card</span></div>
+              <div class="surf-row"><span class="surf-box" style="background:var(--surface-raised)"></span><span class="surf-nm">raised</span></div>
+              <div class="surf-row"><span class="surf-box" style="background:var(--surface-selected)"></span><span class="surf-nm">selected</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <div class="spec-card__head"><div class="nm">Status pills</div><div class="sub">A small fixed set - active, revoked, disabled</div></div>
+        <div class="spec-card__demo card-bg pill-row">
+          <Pill tone="active" dot>Active</Pill>
+          <Pill tone="revoked" dot>Revoked</Pill>
+          <Pill tone="disabled" dot>Disabled</Pill>
+          <span class="note">No badge confetti - these three carry every state.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TYPE ============ -->
+    <section class="ui-section" id="type">
+      <div class="ui-section__title"><span class="no">03</span>Type</div>
+
+      <div class="spec-card">
+        <div class="spec-card__head"><div class="nm">Headings - Archivo</div><div class="sub">Hierarchy from weight + structure, not size alone</div></div>
+        <div class="spec-card__demo card-bg">
+          <div class="type-row"><div class="type-spec">Display - 34 / 700</div><div class="t-d">Verify the path</div></div>
+          <div class="type-row"><div class="type-spec">H1 - 26 / 600</div><div class="t-h1">Applications</div></div>
+          <div class="type-row"><div class="type-spec">H2 - 20 / 600</div><div class="t-h2">Authorized applications</div></div>
+          <div class="type-row"><div class="type-spec">H3 - 16 / 600</div><div class="t-h3">Redirect URIs</div></div>
+          <div class="type-row"><div class="type-spec">Label - 11 / 600</div><div class="t-lbl">Client status</div></div>
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <div class="spec-card__head"><div class="nm">Body &amp; UI text</div><div class="sub">Archivo at reading sizes - primary, secondary, muted</div></div>
+        <div class="spec-card__demo card-bg type-body">
+          <div><div class="type-spec">Body - 14 / 400</div><p class="t-body">Disabling this client immediately invalidates its authorization codes and revokes every issued access and refresh token. Users will be asked to sign in again.</p></div>
+          <div><div class="type-spec">Secondary - 13 / 400</div><p class="t-sec">Register OIDC clients with exact redirect URIs and PKCE enabled.</p></div>
+          <div><div class="type-spec">Muted / meta - 12 / 400</div><p class="t-muted">Last verified 4 minutes ago - 3 active sessions</p></div>
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <div class="spec-card__head"><div class="nm">Machine values - JetBrains Mono</div><div class="sub">Mono only for IDs, tokens, hashes, URIs - never prose</div></div>
+        <div class="spec-card__demo card-bg mono-demo">
+          <div class="mono-line"><span class="mk">Client ID</span><span class="mv">cln_7Q2f9aE4kV0pX1mB</span></div>
+          <div class="mono-line"><span class="mk">Redirect URI</span><span class="mv">https://app.example.com/callback</span></div>
+          <div class="mono-line"><span class="mk">Token (jti)</span><span class="mv">a3F8.eyJhbGciOiJSUzI1Ni ... 9Lx0wQ</span></div>
+          <div class="mono-line"><span class="mk">Key hash</span><span class="mv">SHA-256:0xC0FFEE-48b1-a09f-3D7e</span></div>
+          <div class="mono-line"><span class="mk">Event ID</span><span class="mv">evt_01J9Z6KQ8R4N2C0V</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SPACING ============ -->
+    <section class="ui-section" id="spacing">
+      <div class="ui-section__title"><span class="no">04</span>Spacing &amp; elevation</div>
+
+      <div class="spec-card">
+        <div class="spec-card__head"><div class="nm">Spacing scale</div><div class="sub">4px base - whitespace for hierarchy, never decoration</div></div>
+        <div class="spec-card__demo card-bg space-demo">
+          {spacing.map(([n, px]) => (
+            <div class="space-row"><span class="space-t">{n} - {px}</span><span class="space-bar" style={`width:${px}`}></span></div>
+          ))}
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <div class="spec-card__head"><div class="nm">Radius &amp; elevation</div><div class="sub">Small engineered radii, restrained warm-cast shadows</div></div>
+        <div class="spec-card__demo re-demo">
+          <div class="re-group">
+            <div class="re-item"><div class="re-box" style="border-radius:3px"></div><span class="re-t">xs 3</span></div>
+            <div class="re-item"><div class="re-box" style="border-radius:5px"></div><span class="re-t">sm 5</span></div>
+            <div class="re-item"><div class="re-box" style="border-radius:7px"></div><span class="re-t">md 7</span></div>
+            <div class="re-item"><div class="re-box" style="border-radius:10px"></div><span class="re-t">lg 10</span></div>
+          </div>
+          <div class="re-div"></div>
+          <div class="re-group">
+            <div class="re-item"><div class="re-box re-sh" style="box-shadow:var(--shadow-sm);border-radius:7px"></div><span class="re-t">sm</span></div>
+            <div class="re-item"><div class="re-box re-sh" style="box-shadow:var(--shadow-md);border-radius:7px"></div><span class="re-t">md</span></div>
+            <div class="re-item"><div class="re-box re-sh" style="box-shadow:var(--shadow-lg);border-radius:7px"></div><span class="re-t">lg</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ COMPONENTS ============ -->
+    <section class="ui-section" id="components">
+      <div class="ui-section__title"><span class="no">05</span>Components</div>
+
+      <!-- Forms -->
+      <div class="spec-card">
+        <div class="spec-card__head"><div class="nm">Forms</div><div class="sub">Buttons, inputs, select, checkbox, switch</div></div>
+        <div class="spec-card__demo">
+          <div class="cmp-grid">
+            <div class="cmp-seg">
+              <span class="cap">Buttons</span>
+              <div class="cmp-row">
+                <Button variant="primary" icon="shield-check">Approve</Button>
+                <Button>Cancel</Button>
+                <Button variant="ghost">Details</Button>
+                <Button variant="danger" icon="ban">Disable</Button>
+                <Button variant="primary" busy>Saving</Button>
+                <Button disabled>Disabled</Button>
+              </div>
+              <div class="cmp-row">
+                <Button variant="primary" size="sm">Small</Button>
+                <Button size="sm">Small</Button>
+                <Button variant="outline" size="lg">Large outline</Button>
+                <IconButton icon="refresh-cw" label="Refresh" />
+                <IconButton icon="ellipsis-vertical" label="More" variant="ghost" />
+              </div>
+            </div>
+            <div class="cmp-cols">
+              <div class="cn-field">
+                <label class="cn-field__label" for="ui-n">Client name</label>
+                <input class="cn-input" id="ui-n" value="Billing Portal" />
+                <span class="cn-field__hint">Shown to users on the consent screen.</span>
+              </div>
+              <div class="cn-field">
+                <label class="cn-field__label" for="ui-r">Redirect URI</label>
+                <input class="cn-input cn-input--mono" id="ui-r" value="https://app.example.com/callback" />
+              </div>
+              <div class="cn-field">
+                <label class="cn-field__label" for="ui-p">Consent policy</label>
+                <select class="cn-select" id="ui-p">
+                  <option>Required once</option>
+                  <option>Required each time</option>
+                  <option>Trusted - skip</option>
+                </select>
+              </div>
+              <div class="cn-field">
+                <label class="cn-field__label" for="ui-s">Search</label>
+                <div class="cn-input-group"><span class="cn-input-group__icon"><Icon name="search" size={15} /></span><input class="cn-input" id="ui-s" aria-label="Search users" /></div>
+              </div>
+            </div>
+            <div class="cmp-row cmp-row--wide">
+              <label class="cn-check"><input type="checkbox" checked /><span class="cn-check__box"><Icon name="check" class="cn-check__tick" /></span>Public client (PKCE)</label>
+              <label class="cn-check"><input type="checkbox" data-indeterminate="true" /><span class="cn-check__box"><span class="cn-check__line"></span></span>Some groups selected</label>
+              <label class="cn-check"><input type="radio" name="ui-radio" checked /><span class="cn-check__box cn-check__box--radio"><span class="cn-check__dot"></span></span>OIDC client</label>
+              <label class="cn-switch"><input type="checkbox" checked /><span class="cn-switch__track"><span class="cn-switch__thumb"></span></span>Active</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data display -->
+      <div class="spec-card">
+        <div class="spec-card__head"><div class="nm">Data display</div><div class="sub">Status pills, chips, copy fields, cards, tables</div></div>
+        <div class="spec-card__demo">
+          <div class="cmp-grid">
+            <div>
+              <div class="cap">Status pills &amp; chips</div>
+              <div class="cmp-row">
+                <Pill tone="active" dot>Active</Pill>
+                <Pill tone="revoked" dot>Revoked</Pill>
+                <Pill tone="disabled" dot>Disabled</Pill>
+                <Chip mono>openid</Chip>
+                <Chip mono>profile</Chip>
+                <Chip mono removable>email</Chip>
+              </div>
+            </div>
+            <div>
+              <div class="cap">Copy field</div>
+              <span class="cn-copyfield"><span class="cn-copyfield__value">cln_7Q2f9aE4kV0pX1mB</span><button class="cn-copyfield__btn" type="button"><Icon name="copy" size={11} />Copy</button></span>
+            </div>
+            <Card bodyClass="pt-0">
+              <Fragment slot="header">
+                <div><div class="cn-card__title">Applications</div><div class="cn-card__subtitle">3 registered clients</div></div>
+                <Button size="sm">New</Button>
+              </Fragment>
+                <table class="cn-table cn-table--num">
+                  <thead><tr><th>Application</th><th>Client ID</th><th>Scopes</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr><td style="font-weight:500">Billing Portal</td><td class="mono" style="color:var(--text-secondary)">cln_7Q2f9aE4</td><td><div class="cmp-row" style="gap:5px"><span class="cn-chip cn-chip--mono">openid</span><span class="cn-chip cn-chip--mono">profile</span></div></td><td><span class="cn-pill cn-pill--active"><span class="cn-pill__dot"></span>Active</span></td></tr>
+                    <tr><td style="font-weight:500">CI Runner</td><td class="mono" style="color:var(--text-secondary)">cln_b3K9zR1p</td><td><div class="cmp-row" style="gap:5px"><span class="cn-chip cn-chip--mono">openid</span><span class="cn-chip cn-chip--mono">groups</span></div></td><td><span class="cn-pill cn-pill--disabled"><span class="cn-pill__dot"></span>Disabled</span></td></tr>
+                    <tr><td style="font-weight:500">Legacy Sync</td><td class="mono" style="color:var(--text-secondary)">cln_44Xc0Te2</td><td><div class="cmp-row" style="gap:5px"><span class="cn-chip cn-chip--mono">openid</span></div></td><td><span class="cn-pill cn-pill--revoked"><span class="cn-pill__dot"></span>Revoked</span></td></tr>
+                  </tbody>
+                </table>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="spec-card">
+        <div class="spec-card__head"><div class="nm">Feedback</div><div class="sub">Inline banners and the confirmation dialog</div></div>
+        <div class="spec-card__demo">
+          <div class="fb-grid">
+            <Banner tone="success" icon="shield-check" title="Passkey enrolled">Store your recovery codes now - they are shown once.</Banner>
+            <Banner tone="caution" icon="lock-keyhole" title="Reauthentication required">Confirm your identity to change this password.</Banner>
+            <Banner tone="danger" icon="triangle-alert" title="Secret rotation failed">The client secret was not rotated. No tokens were affected.</Banner>
+            <Banner icon="info">Disabled clients keep their registration and can be reactivated.</Banner>
+
+            <div class="dialog-stage">
+              <div class="cn-dialog" style="box-shadow:var(--shadow-lg);">
+                <div class="cn-dialog__header">
+                  <span class="cn-dialog__icon cn-dialog__icon--danger"><Icon name="triangle-alert" size={18} /></span>
+                  <div><div class="cn-dialog__title">Disable Billing Portal?</div></div>
+                </div>
+                <div class="cn-dialog__body cn-dialog__body--inset">This immediately invalidates its authorization codes and revokes every issued access and refresh token. Users will be asked to sign in again. This cannot be undone.</div>
+                <div class="cn-dialog__footer">
+                  <Button variant="ghost">Cancel</Button>
+                  <Button variant="danger">Disable client</Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="spec-card">
+        <div class="spec-card__head"><div class="nm">Navigation - Tabs</div><div class="sub">Underline tab bar for in-screen sections</div></div>
+        <div class="spec-card__demo card-bg">
+          <div class="tabs-panel" id="ui-tabs">
+            <div class="cn-tabs" role="tablist">
+              {tabs.map((t) => (
+                <button class={`cn-tab${t.id === 'apps' ? ' cn-tab--active' : ''}`} type="button" role="tab" data-tab={t.id} data-label={t.label}>{t.label}</button>
+              ))}
+            </div>
+            <div class="tabs-body">Showing: <span data-tabs-out>Authorized apps</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interaction primitives -->
+      <div class="spec-card">
+        <div class="spec-card__head"><div class="nm">Interaction primitives</div><div class="sub">Motion-rich states, restrained by CairnID tokens and available as reusable cn- patterns</div></div>
+        <div class="spec-card__demo">
+          <div class="interaction-grid">
+            <div class="cmp-seg">
+              <span class="cap">Segmented tabs &amp; tooltip</span>
+              <div class="cmp-row">
+                <div class="cn-tabs cn-tabs--segment" role="tablist" aria-label="Client type">
+                  <button class="cn-tab cn-tab--active" type="button" role="tab">Confidential</button>
+                  <button class="cn-tab" type="button" role="tab">Public</button>
+                  <button class="cn-tab" type="button" role="tab">Device</button>
+                </div>
+                <span class="cn-tooltip">
+                  <IconButton icon="info" label="Explain client type" variant="ghost" />
+                  <span class="cn-tooltip__bubble">Confidential clients can hold a secret.</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="cmp-seg">
+              <span class="cap">OTP input</span>
+              <div class="cn-otp" aria-label="One-time code">
+                <input class="cn-otp__cell" inputmode="numeric" maxlength="1" value="4" aria-label="Digit 1" />
+                <input class="cn-otp__cell" inputmode="numeric" maxlength="1" value="8" aria-label="Digit 2" />
+                <input class="cn-otp__cell" inputmode="numeric" maxlength="1" value="1" aria-label="Digit 3" />
+                <input class="cn-otp__cell" inputmode="numeric" maxlength="1" aria-label="Digit 4" />
+                <input class="cn-otp__cell" inputmode="numeric" maxlength="1" aria-label="Digit 5" />
+                <input class="cn-otp__cell" inputmode="numeric" maxlength="1" aria-label="Digit 6" />
+              </div>
+            </div>
+
+            <div class="cmp-seg">
+              <span class="cap">Command palette</span>
+              <div class="cn-command">
+                <div class="cn-command__search"><Icon name="search" size={16} /><input class="cn-command__input" value="rotate" aria-label="Command search" /></div>
+                <div class="cn-command__list">
+                  <div class="cn-command__item" aria-selected="true"><Icon name="key-round" size={16} /><span>Rotate client secret</span><kbd class="cn-command__kbd">Enter</kbd></div>
+                  <div class="cn-command__item"><Icon name="download" size={16} /><span>Export audit events</span><kbd class="cn-command__kbd">E</kbd></div>
+                  <div class="cn-command__item"><Icon name="user-plus" size={16} /><span>Invite user</span><kbd class="cn-command__kbd">I</kbd></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="cmp-seg">
+              <span class="cap">Action bar &amp; overflow</span>
+              <div class="action-demo">
+                <div class="cn-action-bar" aria-label="Application actions">
+                  <IconButton icon="pencil" label="Edit" variant="ghost" size="sm" />
+                  <IconButton icon="copy" label="Copy client ID" variant="ghost" size="sm" />
+                  <span class="cn-action-bar__divider"></span>
+                  <IconButton icon="ellipsis-vertical" label="More actions" variant="ghost" size="sm" />
+                </div>
+                <div class="cn-overflow">
+                  <button class="cn-overflow__item" type="button"><Icon name="refresh-cw" size={15} />Rotate secret</button>
+                  <button class="cn-overflow__item" type="button"><Icon name="download" size={15} />Export evidence</button>
+                  <button class="cn-overflow__item cn-overflow__item--danger" type="button"><Icon name="ban" size={15} />Disable client</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="cmp-seg">
+              <span class="cap">Toast stack</span>
+              <div class="cn-toast-stack">
+                <div class="cn-toast cn-toast--success">
+                  <span class="cn-toast__icon"><Icon name="shield-check" size={17} /></span>
+                  <div><div class="cn-toast__title">Secret rotated</div><div class="cn-toast__body">The old secret remains valid for 10 minutes.</div></div>
+                  <IconButton icon="x" label="Dismiss" variant="ghost" size="sm" />
+                </div>
+                <div class="cn-toast cn-toast--caution">
+                  <span class="cn-toast__icon"><Icon name="triangle-alert" size={17} /></span>
+                  <div><div class="cn-toast__title">Review redirect URI</div><div class="cn-toast__body">The new URI is outside the current app domain.</div></div>
+                  <IconButton icon="x" label="Dismiss" variant="ghost" size="sm" />
+                </div>
+              </div>
+            </div>
+
+            <div class="cmp-seg">
+              <span class="cap">Drawer shell</span>
+              <div class="cn-drawer-stage" aria-label="Drawer preview">
+                <div class="cn-drawer__backdrop"></div>
+                <aside class="cn-drawer" aria-label="Client drawer">
+                  <div class="cn-drawer__header"><div class="cn-drawer__title">Billing Portal</div><IconButton icon="x" label="Close drawer" variant="ghost" size="sm" /></div>
+                  <div class="cn-drawer__body">
+                    <p>Exact redirect matching, PKCE, scopes, and secret rotation live in one focused side panel.</p>
+                    <div class="drawer-meta">
+                      <span>Client ID</span><code>cln_7Q2f9aE4</code>
+                      <span>Status</span><Pill tone="active" dot>Active</Pill>
+                    </div>
+                  </div>
+                  <div class="cn-drawer__footer"><Button variant="ghost" size="sm">Cancel</Button><Button variant="primary" size="sm">Save</Button></div>
+                </aside>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ICONS ============ -->
+    <section class="ui-section" id="icons">
+      <div class="ui-section__title"><span class="no">06</span>Icons</div>
+      <div class="spec-card">
+        <div class="spec-card__head"><div class="nm">Boxicons via Astro Iconify</div><div class="sub">One line set - inlined at build, no CDN (strict CSP)</div></div>
+        <div class="spec-card__demo card-bg">
+          <div class="icon-grid">
+            {iconNames.map((n) => (
+              <div class="icon-cell"><Icon name={n} size={20} /><span class="icon-nm">{n}</span></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</SiteLayout>
+
+<script is:inline>
+  (function () {
+    var root = document.getElementById('ui-tabs');
+    if (!root) return;
+    var out = root.querySelector('[data-tabs-out]');
+    root.querySelectorAll('[data-tab]').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        root.querySelectorAll('[data-tab]').forEach(function (t) { t.classList.remove('cn-tab--active'); });
+        tab.classList.add('cn-tab--active');
+        if (out) out.textContent = tab.getAttribute('data-label');
+      });
+    });
+  })();
+</script>
+
+<style>
+  .ui-head { padding: clamp(44px, 6vw, 76px) 0 clamp(8px, 2vw, 16px); }
+  .ui-head .eyebrow { font-family: var(--font-mono); font-size: 12px; color: var(--accent); }
+  .ui-head h1 { font-size: clamp(32px, 4.4vw, 46px); letter-spacing: -0.022em; line-height: 1.06; margin: 12px 0 0; }
+  .ui-head p { font-size: clamp(15px, 1.6vw, 17px); color: var(--text-secondary); line-height: 1.6; margin-top: 16px; max-width: 64ch; }
+
+  .ui-body { padding-bottom: 64px; }
+  .ui-section { padding-top: clamp(36px, 4vw, 52px); }
+  .ui-section__title { display: flex; align-items: baseline; gap: 12px; font-size: 13px; font-weight: 600; color: var(--text-primary); padding-bottom: 16px; border-bottom: 1px solid var(--border-default); margin-bottom: 22px; }
+  .ui-section__title .no { font-family: var(--font-mono); font-size: 12px; color: var(--accent); font-weight: 500; }
+
+  .spec-card { border: 1px solid var(--border-default); border-radius: var(--radius-md); overflow: hidden; background: var(--surface-card); margin-bottom: 18px; }
+  .spec-card__head { padding: 13px 18px; border-bottom: 1px solid var(--border-subtle); background: var(--surface-sunken); }
+  .spec-card__head .nm { font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
+  .spec-card__head .sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .spec-card__demo { padding: 22px 24px; }
+  .spec-card__demo.card-bg { background: var(--surface-card); }
+  .note { font-size: 12px; color: var(--text-muted); }
+
+  /* Brand */
+  .brand-demo { display: grid; grid-template-columns: 1fr 1fr; padding: 0; }
+  .brand-cell { display: flex; align-items: center; gap: 14px; padding: 34px 28px; }
+  .brand-cell.light { background: var(--stone-25); }
+  .brand-cell.dark { background: #1a1714; }
+  .lockup { display: flex; align-items: center; gap: 12px; }
+  .word { font-size: 27px; font-weight: 700; letter-spacing: -0.01em; line-height: 1; }
+  .word .id { color: var(--accent); }
+  .brand-cell.light .word { color: var(--stone-900); }
+  .brand-cell.dark .word { color: #f0ebe2; }
+  .brand-cell.dark .word .id { color: #34bfa1; }
+  .brand-tag { display: block; margin-top: 5px; font-size: 11.5px; letter-spacing: 0.04em; color: #8c8475; }
+
+  /* Color scales */
+  .scale { display: grid; gap: 8px; }
+  .scale--11 { grid-template-columns: repeat(11, 1fr); }
+  .scale--8 { grid-template-columns: repeat(8, 1fr); margin-bottom: 16px; }
+  .sw { display: flex; flex-direction: column; gap: 5px; }
+  .chip { height: 54px; border-radius: var(--radius-sm); border: 1px solid rgba(27,24,19,0.08); }
+  .name { font-size: 10px; color: var(--text-muted); text-align: center; }
+  .hex { font-family: var(--font-mono); font-size: 9px; color: var(--text-secondary); text-align: center; }
+  .accent-use { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .accent-link { color: var(--accent); font-size: 13px; font-weight: 500; }
+  @media (max-width: 720px) { .scale--11 { grid-template-columns: repeat(6, 1fr); } .scale--8 { grid-template-columns: repeat(4, 1fr); } }
+
+  .sem-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .sem { border: 1px solid; border-radius: var(--radius-md); padding: 14px; }
+  .sem h4 { margin: 0 0 6px; font-size: 13px; font-weight: 600; }
+  .sem p { font-size: 12px; line-height: 1.45; }
+  .sem.s { background: var(--success-bg); border-color: var(--success-border); }
+  .sem.s h4, .sem.s p { color: var(--success-fg); }
+  .sem.c { background: var(--caution-bg); border-color: var(--caution-border); }
+  .sem.c h4, .sem.c p { color: var(--caution-fg); }
+  .sem.d { background: var(--danger-bg); border-color: var(--danger-border); }
+  .sem.d h4, .sem.d p { color: var(--danger-fg); }
+  @media (max-width: 640px) { .sem-grid { grid-template-columns: 1fr; } }
+
+  .surf-demo { display: grid; grid-template-columns: 1fr 1fr; padding: 0; }
+  .surf-pane { padding: 20px 22px; }
+  .surf-pane.light { background: var(--stone-25); }
+  .surf-pane.dark { background: #1a1714; }
+  .surf-lbl { font-size: 10px; margin-bottom: 10px; }
+  .surf-pane.light .surf-lbl { color: var(--text-muted); }
+  .surf-pane.dark .surf-lbl { color: #8c8475; }
+  .surf-stack { display: grid; gap: 8px; }
+  .surf-row { display: flex; align-items: center; gap: 10px; }
+  .surf-box { width: 40px; height: 28px; border-radius: var(--radius-sm); border: 1px solid var(--border-default); }
+  .surf-nm { font-size: 11px; }
+  .surf-pane.light .surf-nm { color: var(--text-secondary); }
+  .surf-pane.dark .surf-nm { color: #bbb3a4; }
+
+  .pill-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+
+  /* Type */
+  .type-row { display: flex; align-items: baseline; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--border-subtle); }
+  .type-row:last-child { border-bottom: 0; }
+  .type-spec { width: 132px; flex: none; font-size: 11px; color: var(--text-muted); }
+  .t-d { font-size: 34px; font-weight: 700; letter-spacing: -0.015em; color: var(--text-primary); }
+  .t-h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.006em; color: var(--text-primary); }
+  .t-h2 { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+  .t-h3 { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+  .t-lbl { font-size: 11px; font-weight: 600; color: var(--text-secondary); }
+  .type-body { display: grid; gap: 14px; }
+  .t-body { font-size: 14px; color: var(--text-primary); max-width: 560px; line-height: 1.5; }
+  .t-sec { font-size: 13px; color: var(--text-secondary); max-width: 560px; }
+  .t-muted { font-size: 12px; color: var(--text-muted); }
+
+  .mono-demo { display: grid; gap: 12px; }
+  .mono-line { display: grid; grid-template-columns: 130px 1fr; align-items: center; gap: 14px; }
+  .mono-line .mk { font-size: 11px; color: var(--text-muted); }
+  .mono-line .mv { font-family: var(--font-mono); font-size: 13px; color: var(--code-fg); background: var(--code-bg); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 6px 9px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-feature-settings: "tnum" 1,"zero" 1; }
+  @media (max-width: 560px) { .mono-line { grid-template-columns: 1fr; gap: 4px; } }
+
+  /* Spacing + elevation */
+  .space-demo { display: grid; gap: 9px; }
+  .space-row { display: flex; align-items: center; gap: 14px; }
+  .space-t { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); width: 86px; }
+  .space-bar { height: 16px; background: var(--teal-200); border-radius: 2px; }
+  .re-demo { display: flex; gap: 30px; align-items: flex-start; background: var(--surface-page); }
+  .re-group { display: flex; gap: 14px; }
+  .re-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .re-box { width: 54px; height: 44px; background: var(--surface-card); border: 1px solid var(--border-default); }
+  .re-box.re-sh { border: 0; }
+  .re-t { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-secondary); }
+  .re-div { width: 1px; align-self: stretch; background: var(--border-default); }
+
+  /* Components */
+  .cmp-grid { display: grid; gap: 22px; max-width: 660px; }
+  .cmp-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .cmp-row--wide { gap: 24px; }
+  .cmp-seg { display: grid; gap: 10px; }
+  .cap { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; display: block; }
+  .cmp-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  @media (max-width: 640px) { .cmp-cols { grid-template-columns: 1fr; } }
+
+  .fb-grid { display: grid; gap: 14px; max-width: 640px; }
+  .dialog-stage { background: var(--surface-sunken); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 26px; display: grid; place-items: center; }
+  .dialog-stage .cn-dialog { width: min(420px, 100%); }
+
+  .tabs-panel { max-width: 560px; }
+  .tabs-body { padding: 16px 2px; font-size: 14px; color: var(--text-secondary); }
+
+  .interaction-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; align-items: start; }
+  .action-demo { display: grid; gap: 10px; justify-items: start; }
+  .drawer-meta { display: grid; grid-template-columns: 86px 1fr; gap: 9px 12px; margin-top: 16px; align-items: center; font-size: 12px; }
+  .drawer-meta span { color: var(--text-muted); }
+  .drawer-meta code { color: var(--code-fg); background: var(--code-bg); border: 1px solid var(--border-subtle); border-radius: var(--radius-xs); padding: 3px 6px; overflow-wrap: anywhere; }
+  @media (max-width: 760px) { .interaction-grid { grid-template-columns: 1fr; } }
+
+  .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 1px; background: var(--border-subtle); border: 1px solid var(--border-default); border-radius: var(--radius-md); overflow: hidden; }
+  .icon-cell { display: flex; flex-direction: column; align-items: center; gap: 9px; padding: 16px 8px; background: var(--surface-card); color: var(--text-secondary); }
+  .icon-cell:hover { background: var(--surface-hover); color: var(--accent); }
+  .icon-nm { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); text-align: center; word-break: break-word; }
+</style>

@@ -1,0 +1,64 @@
+---
+import Icon from '../Icon.astro';
+
+type Props = {
+  href?: string;
+  variant?: 'primary' | 'secondary' | 'ghost' | 'outline' | 'danger';
+  size?: 'sm' | 'md' | 'lg';
+  block?: boolean;
+  icon?: string;
+  trailingIcon?: string;
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  busy?: boolean;
+  state?: 'success' | 'danger';
+  class?: string;
+  ariaLabel?: string;
+  [key: string]: unknown;
+};
+
+const {
+  href,
+  variant = 'secondary',
+  size = 'md',
+  block = false,
+  icon,
+  trailingIcon,
+  type = 'button',
+  disabled = false,
+  busy = false,
+  state,
+  class: className = '',
+  ariaLabel,
+  ...rest
+} = Astro.props;
+
+const classes = [
+  'cn-btn',
+  `cn-btn--${variant}`,
+  size !== 'md' ? `cn-btn--${size}` : '',
+  block ? 'cn-btn--block' : '',
+  className,
+].filter(Boolean).join(' ');
+
+const common = {
+  class: classes,
+  'aria-busy': busy ? true : undefined,
+  'aria-label': ariaLabel,
+  'data-state': state,
+  ...rest,
+};
+---
+{href ? (
+  <a href={href} {...common}>
+    {busy ? <span class="cn-btn__spinner" aria-hidden="true"></span> : icon && <Icon name={icon} size={16} />}
+    <slot />
+    {trailingIcon && <Icon name={trailingIcon} size={16} />}
+  </a>
+) : (
+  <button type={type} disabled={disabled} {...common}>
+    {busy ? <span class="cn-btn__spinner" aria-hidden="true"></span> : icon && <Icon name={icon} size={16} />}
+    <slot />
+    {trailingIcon && <Icon name={trailingIcon} size={16} />}
+  </button>
+)}

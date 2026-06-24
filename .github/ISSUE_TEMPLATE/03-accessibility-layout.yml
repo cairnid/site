@@ -1,0 +1,55 @@
+name: Accessibility or layout issue
+description: Report a site-only accessibility, responsive layout, keyboard, or reading-order issue.
+title: "[Accessibility/Layout]: "
+labels: ["site", "accessibility", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form only for standalone site accessibility or layout issues.
+
+        Do not include secrets, tokens, keys, private deployment data, sensitive logs, or exploit details.
+        Do not report vulnerabilities publicly. Follow SECURITY.md instead.
+        Product runtime, authentication, API, deployment, and operator reports belong in the published product repository or organization process for that component, not in this site repo.
+  - type: input
+    id: affected-page
+    attributes:
+      label: Affected page or path
+      description: Name the public site page, route, or file path where the issue appears.
+    validations:
+      required: true
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: Issue type
+      options:
+        - Accessibility
+        - Layout
+        - Keyboard navigation
+        - Reading order
+        - Responsive behavior
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is the issue?
+      description: Describe what is hard to use, read, navigate, or understand.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Browser, device, or assistive technology
+      description: Include browser, device size, input method, or assistive technology when relevant.
+    validations:
+      required: false
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I have not included secrets, tokens, keys, sensitive logs, private deployment data, or vulnerability details.
+          required: true
+        - label: This is not about product runtime, authentication, API behavior, deployment behavior, operator support, or a security vulnerability.
+          required: true

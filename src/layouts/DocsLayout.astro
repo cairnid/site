@@ -1,0 +1,72 @@
+---
+import type { MarkdownHeading } from 'astro';
+import type { DocEntry } from '../lib/docs';
+import { docRoute, groupDocsByCategory } from '../lib/docs';
+import SiteLayout from './SiteLayout.astro';
+
+type Props = {
+  doc: DocEntry;
+  docs: DocEntry[];
+  headings: MarkdownHeading[];
+};
+
+const { doc, docs, headings } = Astro.props;
+const docsByCategory = groupDocsByCategory(docs);
+const visibleHeadings = headings
+  .filter((heading) => heading.depth === 2 || heading.depth === 3)
+  .slice(0, 12);
+---
+
+<SiteLayout
+  title={`${doc.data.title}  -  Docs`}
+  description={doc.data.description}
+  active="docs"
+  mainClass="docs-main"
+>
+  <div class="docs-layout">
+    <aside class="docs-sidebar" aria-label="Documentation navigation">
+      <nav>
+        {Array.from(docsByCategory.entries()).map(([category, entries]) => (
+          <div class="docs-sidebar__group">
+            <h4>{category}</h4>
+            <ul>
+              {entries.map((entry) => (
+                <li>
+                  <a href={docRoute(entry)} aria-current={entry.id === doc.id ? 'page' : undefined}>
+                    {entry.data.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </nav>
+    </aside>
+
+    <article class="docs-article">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/docs/">Docs</a>
+        <span class="breadcrumb__sep" aria-hidden="true">/</span>
+        <span aria-current="page">{doc.data.category}</span>
+      </nav>
+      <h1>{doc.data.title}</h1>
+      <p class="docs-description">{doc.data.description}</p>
+      <div class="markdown-body">
+        <slot />
+      </div>
+    </article>
+
+    {visibleHeadings.length > 0 && (
+      <nav class="page-toc" aria-label="On this page">
+        <h4>On this page</h4>
+        <ul>
+          {visibleHeadings.map((heading) => (
+            <li class={`toc-level-${heading.depth}`}>
+              <a href={`#${heading.slug}`}>{heading.text}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )}
+  </div>
+</SiteLayout>

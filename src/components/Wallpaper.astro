@@ -1,0 +1,28 @@
+﻿---
+/*
+ * Wallpaper  -  a calm, on-brand backdrop for the "floating card" surface previews.
+ * A subtle warm mesh-gradient wash built from theme tokens, so it adapts to
+ * light/dark. Drawn with CSS gradients only  -  no external image, no blur filter,
+ * so it stays crisp and CSP-clean. `variant` flips the gradient so adjacent
+ * panels don't look identical.
+ */
+type Props = { variant?: number; class?: string };
+const { variant = 0, class: className } = Astro.props;
+---
+<div class:list={['wp', `wp--v${variant % 4}`, className]} aria-hidden="true"></div>
+<style>
+  .wp { position: absolute; inset: 0; z-index: 0; overflow: hidden; background: var(--surface-sunken); }
+  .wp::before {
+    content: "";
+    position: absolute;
+    inset: -15%;
+    background:
+      radial-gradient(38% 42% at 18% 20%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%),
+      radial-gradient(44% 46% at 84% 16%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 72%),
+      radial-gradient(50% 54% at 74% 94%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%),
+      radial-gradient(48% 56% at 6% 96%, color-mix(in srgb, var(--surface-hover) 85%, transparent), transparent 72%);
+  }
+  .wp--v1::before { transform: scaleX(-1); }
+  .wp--v2::before { transform: scale(-1, 1) rotate(8deg); }
+  .wp--v3::before { transform: scaleY(-1); }
+</style>

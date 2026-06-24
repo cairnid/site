@@ -1,0 +1,62 @@
+/*
+ * CairnID self-hosted webfonts. No external origins (strict CSP - the site must
+ * not leak font requests to third-party CDNs). Served locally from /public/fonts.
+ *
+ *   Archivo        - engineered grotesque for all UI + headings (400/500/600/700),
+ *                    tabular lining numerals.
+ *   JetBrains Mono - machine values only: client IDs, tokens, hashes, JWKS,
+ *                    redirect URIs, event IDs (400/500/600), slashed zero.
+ */
+
+/* Archivo */
+@font-face {
+  font-family: "Archivo";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/Archivo-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Archivo";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/Archivo-Medium.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Archivo";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/Archivo-SemiBold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Archivo";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/Archivo-Bold.woff2") format("woff2");
+}
+
+/* JetBrains Mono */
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/JetBrainsMono-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/JetBrainsMono-Medium.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/JetBrainsMono-SemiBold.woff2") format("woff2");
+}

@@ -1,0 +1,28 @@
+---
+import Icon from '../Icon.astro';
+
+type Props = {
+  tone?: 'info' | 'success' | 'caution' | 'danger';
+  icon?: string;
+  title?: string;
+  class?: string;
+  [key: string]: unknown;
+};
+
+const {
+  tone = 'info',
+  icon,
+  title,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const classes = ['cn-banner', `cn-banner--${tone}`, className].filter(Boolean).join(' ');
+---
+<div class={classes} {...rest}>
+  {icon && <span class="cn-banner__icon"><Icon name={icon} size={17} /></span>}
+  <div class="cn-banner__body">
+    {title && <div class="cn-banner__title">{title}</div>}
+    <slot />
+  </div>
+</div>

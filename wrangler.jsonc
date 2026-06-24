@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "cairnid-site",
+  "compatibility_date": "2026-06-24",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  },
+  "routes": [
+    {
+      "pattern": "cairnid.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.cairnid.com",
+      "custom_domain": true
+    }
+  ]
+}
