@@ -96,7 +96,7 @@ The smoke command sends the same command-provider JSON shape with `template="pro
 - `POST /api/v1/users/{user_id}/email-verification/request`: admin-only browser endpoint, requiring `owner` membership in the built-in `administrators` group and CSRF; queues a verification email for an active unverified organization user.
 - `POST /api/v1/users/{user_id}/password-recovery/request`: admin-only browser endpoint, requiring `owner` membership in the built-in `administrators` group and CSRF; queues a password recovery email for an active password-bearing organization user.
 
-All browser POST endpoints require the double-submit CSRF flow described in [api.md](api.md).
+All browser POST endpoints require the double-submit CSRF flow described in [API](/docs/api/).
 
 ## Usage Examples
 

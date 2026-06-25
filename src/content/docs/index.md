@@ -9,29 +9,29 @@ CairnID documentation is authored in this repository. The public site mirrors th
 
 ## Start Here
 
-- [Architecture](architecture/overview.md): runtime shape, crate boundaries, storage, and deployment flow.
-- [API](api.md): implemented HTTP, OIDC/OAuth, session, admin, MFA, account lifecycle, and SCIM endpoints.
-- [Deployment](deployment.md): local Compose, container runtime, environment variables, and Windows build notes.
-- [Operations](operations.md): release evidence, preflight, backup/restore, key rotation, audit export, and drills.
-- [MCP](mcp.md): local read-only release-evidence tools over stdio.
-- [Security posture](security.md): implemented controls, gaps, release evidence, and reporting boundaries.
-- [Release gates](release-gates.md): required evidence before production recommendation.
+- [Architecture](/docs/architecture/): runtime shape, crate boundaries, storage, and deployment flow.
+- [API](/docs/api/): implemented HTTP, OIDC/OAuth, session, admin, MFA, account lifecycle, and SCIM endpoints.
+- [Deployment](/docs/deployment/): local Compose, container runtime, environment variables, and Windows build notes.
+- [Operations](/docs/operations/): release evidence, preflight, backup/restore, key rotation, audit export, and drills.
+- [MCP](/docs/mcp/): local read-only release-evidence tools over stdio.
+- [Security posture](/docs/security/): implemented controls, gaps, release evidence, and reporting boundaries.
+- [Release gates](/docs/release-gates/): required evidence before production recommendation.
 
 ## Protocol And Product Areas
 
-- [MFA](mfa.md)
-- [Account lifecycle](account-lifecycle.md)
-- [SCIM](scim.md)
-- [OpenID conformance](openid-conformance.md)
-- [Dependency policy](dependencies.md)
-- [Threat model](threat-model.md)
+- [MFA](/docs/mfa/)
+- [Account lifecycle](/docs/account-lifecycle/)
+- [SCIM](/docs/scim/)
+- [OpenID conformance](/docs/openid-conformance/)
+- [Dependency policy](/docs/dependencies/)
+- [Threat model](/docs/threat-model/)
 
 ## Project References
 
-- [Changelog](../CHANGELOG.md)
-- [Security policy](../SECURITY.md)
-- [Support](../SUPPORT.md)
-- [Roadmap](../ROADMAP.md)
+- [Changelog](/docs/changelog/)
+- [Security policy](/docs/security-policy/)
+- [Support](/docs/support/)
+- [Roadmap](/docs/roadmap/)
 
 ## Website Build
 

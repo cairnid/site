@@ -25,6 +25,10 @@ The repository includes a root `.dockerignore` so generated Rust targets, Bun de
 
 ## API Container
 
+### Current Container Status
+
+The repository contains Dockerfiles and Compose configuration, and CI validates that the API and web images build and pass image-level smoke checks. The current release workflow does not publish container images or registry digests. Operators should build images from the reviewed source checkout until a separate container publishing workflow and registry policy are added.
+
 The root `Dockerfile` builds `cairn-api` with CMake, NASM, pkg-config, and Linux OpenSSL development headers for AWS-LC, OpenSSL key generation, and `webauthn-rs`. The runtime stage ships a slim Debian image with CA certificates and `libssl3`.
 
 The API image healthcheck runs `cairn-api healthcheck`, which performs an HTTP GET against the local `/healthz` endpoint and requires the JSON status payload to be `ok`. Because `/healthz` performs a database health check, container health probes cover both HTTP serving and Postgres reachability after startup migrations.
@@ -81,14 +85,40 @@ Run preflight after deployment migrations, after signing-key or KEK maintenance,
 
 Release evidence scaffold and check:
 
+Until a tagged RC is published, run `cairnid` through Cargo in a local checkout or build the local binary first:
+
 ```powershell
-cairn-api operations evidence-plan
-cairn-api operations evidence-init <evidence-dir>
-cairn-api operations evidence-status <evidence-dir>
-cairn-api operations evidence-check <evidence-dir>
+cargo run -p cairnid --locked -- evidence plan
+cargo run -p cairnid --locked -- evidence init <evidence-dir>
+cargo run -p cairnid --locked -- evidence status --evidence-dir <evidence-dir>
+cargo run -p cairnid --locked -- evidence check --evidence-dir <evidence-dir>
 ```
 
-Run the plan first to confirm required capture environment variable names are present without printing values. Run the initializer before collecting artifacts so the directory has the generated manifest, checklist README, and `.gitignore` guard for secret-bearing evidence. Run the status command during collection to get counts and next artifact commands, then run the checker after production-like deployed OIDC metadata, OIDF, SCIM, email, restore, key-rotation, break-glass, and audit drill evidence has been collected. It validates scaffold integrity, strict directory inventory, required artifact names, freshness, forbidden secret-bearing field names in token-free artifacts, and passing status without printing secrets, with failure text redacting obvious secret-looking values; the full artifact contract is documented in [operations.md](operations.md).
+Run the plan first to confirm required capture environment variable names are present without printing values. Run the initializer before collecting artifacts so the directory has the generated manifest, checklist README, and `.gitignore` guard for secret-bearing evidence. Run the status command during collection to get counts and next artifact commands, then run the checker after production-like deployed OIDC metadata, OIDF, SCIM, email, restore, key-rotation, break-glass, and audit drill evidence has been collected. It validates scaffold integrity, strict directory inventory, required artifact names, freshness, forbidden secret-bearing field names in token-free artifacts, and passing status without printing secrets, with failure text redacting obvious secret-looking values; the full artifact contract is documented in [operations](/docs/operations/).
+
+Tagged CLI/MCP release archives:
+
+The public binary distribution path is `.github/workflows/release.yml`, not CI artifacts. A pushed tag matching `vMAJOR.MINOR.PATCH` or `vMAJOR.MINOR.PATCH-rc.N` must be reachable from `origin/main` and must have a successful completed `CI` run for the exact tagged commit. The workflow then builds release-mode `cairnid` and `cairnid-mcp` archives for Linux x86_64 and Windows x86_64, generates CycloneDX JSON SBOMs, writes `SHA256SUMS.txt` and `release-manifest.json`, and creates GitHub artifact attestations with `actions/attest@v4` using GitHub Actions OIDC. The workflow creates a draft GitHub Release; maintainers publish it only after review. RC tags are prereleases and are not marked latest.
+
+Each `cairnid` CLI archive includes generated shell completions under `completions/` and roff manpages for the root command and visible subcommands under `man/man1/`. `cairnid-mcp` archives do not include those CLI-only support files.
+
+The regular CI workflow's `*-ci-rehearsal-*` Actions artifacts are build/smoke proof only. They expire, are not attached to a GitHub Release, and should not be documented as installable public release assets.
+
+Maintainers can also run `.github/workflows/release.yml` manually with a `candidate_tag` input to rehearse the release asset path before creating a tag. That rehearsal builds and packages both CLI/MCP targets, assembles SBOMs, checksums, and manifest files, runs the local verifier as far as possible while still failing the public-release evidence contract for the absent GitHub Release URL and attestations, and uploads only short-lived Actions artifacts named `release-rehearsal-assets-*`. It does not create a tag, create a GitHub Release, generate attestations, or publish assets for users.
+
+After a release draft is published, install by downloading the matching archive from the GitHub Release. Verify the archive before use:
+
+```powershell
+gh release download v0.1.0-rc.1 --repo cairnid/cairnid --dir cairnid-release
+cd cairnid-release
+gh attestation verify .\cairnid-v0.1.0-rc.1-x86_64-pc-windows-msvc.zip --repo cairnid/cairnid --signer-workflow cairnid/cairnid/.github/workflows/release.yml --source-ref refs/tags/v0.1.0-rc.1
+gh attestation verify .\cairnid-v0.1.0-rc.1-x86_64-pc-windows-msvc.zip --repo cairnid/cairnid --signer-workflow cairnid/cairnid/.github/workflows/release.yml --source-ref refs/tags/v0.1.0-rc.1 --predicate-type https://cyclonedx.org/bom
+Get-FileHash .\cairnid-v0.1.0-rc.1-x86_64-pc-windows-msvc.zip -Algorithm SHA256
+```
+
+The first attestation command verifies default SLSA provenance for the archive. The second verifies the CycloneDX SBOM attestation for the same archive. Compare the hash with `SHA256SUMS.txt`, `release-manifest.json`, and GitHub's release asset digest. On Linux, verify with `sha256sum -c SHA256SUMS.txt --ignore-missing` and the same `gh attestation verify` commands against `./cairnid-v0.1.0-rc.1-x86_64-unknown-linux-gnu.tar.gz`.
+
+This first distribution slice intentionally does not publish crates.io packages, Homebrew formulae, MSI installers, macOS notarized assets, Authenticode signatures, containers, or site/runtime artifacts.
 
 OpenID conformance preparation:
 
@@ -97,11 +127,11 @@ cairn-api conformance oidcc-static-registration > openid-static-registration.jso
 cairn-api conformance oidcc-static-config > cairn-oidcc-static.json
 ```
 
-Use these against a production-like HTTPS issuer to prepare Config OP and Basic OP suite runs. `cairn-api operations preflight` reports missing `CAIRN_CONFORMANCE_*` variables and whether the issuer is suitable for the suite before the artifact commands are run. The full profile setup is documented in [openid-conformance.md](openid-conformance.md).
+Use these against a production-like HTTPS issuer to prepare Config OP and Basic OP suite runs. `cairn-api operations preflight` reports missing `CAIRN_CONFORMANCE_*` variables and whether the issuer is suitable for the suite before the artifact commands are run. The full profile setup is documented in [OpenID conformance](/docs/openid-conformance/).
 
-CI validates release-evidence tooling with placeholder environment values. It proves `evidence-plan` does not print values, `evidence-init` writes the expected scaffold, and `evidence-status` reports next actions for an incomplete evidence directory.
+CI validates `cairnid evidence` tooling with placeholder environment values. Linux CI proves `cairnid evidence plan` does not print values, `cairnid evidence init` writes the expected scaffold, and `cairnid evidence status` reports next actions for an incomplete evidence directory. Windows CI runs `cargo test -p cairnid --locked` for the CLI binary contract, including manifest, init, incomplete status/check, and common failure-redaction coverage.
 
-CI also generates the dependency-policy evidence receipt after pinned `cargo-deny`, `cargo-audit`, and Bun audit checks pass. Container checks validate the Compose file, build both production images, run `cairn-api signing-key generate-kek` inside the API image, run `bun --version` inside the web image, and boot the web image long enough to run its `/healthz` probe. Docker Compose waits for Postgres health before starting the API and waits for API health before starting the web service. The image smokes verify Dockerfile buildability and runtime entrypoint dependencies without requiring a live database or external provider.
+CI also generates the dependency-policy evidence receipt after pinned `cargo-deny`, `cargo-audit`, and Bun audit checks pass. Container checks validate the Compose file, build both production images, run `cairn-api signing-key generate-kek` inside the API image, run `bun --version` inside the web image, and boot the web image long enough to run its `/healthz` probe. Docker Compose waits for Postgres health before starting the API and waits for API health before starting the web service. The image smokes verify Dockerfile buildability and runtime entrypoint dependencies without requiring a live database or external provider. These checks stop at smoke coverage and create no image tags, registry entries, or digests.
 
 Operational email delivery command:
 
@@ -119,9 +149,9 @@ cairn-api email-outbox smoke-provider ops@example.com
 
 The smoke command sends a synthetic `provider_smoke` payload to the configured command provider and exits non-zero if provider credentials, network access, or receipt handling fail.
 
-Backup, restore, signing-key rotation, and KEK handling are covered in [operations.md](operations.md).
+Backup, restore, signing-key rotation, and KEK handling are covered in [operations](/docs/operations/).
 
-SCIM provisioning is optional and disabled unless `CAIRN_SCIM_BEARER_TOKEN_SHA256` is set. Generate a high-entropy raw bearer token, store only its SHA-256 hex digest in the API environment, and configure the raw token in the directory provisioning client. During rotation, deploy a comma-separated old/new hash set, move connectors to the new raw token, then remove the retired hash. Setup and smoke tests are covered in [scim.md](scim.md).
+SCIM provisioning is optional and disabled unless `CAIRN_SCIM_BEARER_TOKEN_SHA256` is set. Generate a high-entropy raw bearer token, store only its SHA-256 hex digest in the API environment, and configure the raw token in the directory provisioning client. During rotation, deploy a comma-separated old/new hash set, move connectors to the new raw token, then remove the retired hash. Setup and smoke tests are covered in [SCIM](/docs/scim/).
 
 Run `cairn-api scim smoke` against the deployed API after setting `CAIRN_SCIM_BEARER_TOKEN`; set `CAIRN_SCIM_SECONDARY_BEARER_TOKEN` during the overlap window and `CAIRN_SCIM_REJECTED_BEARER_TOKEN` after retiring an old token when validating rotation.
 
@@ -135,7 +165,7 @@ Run this only during KEK rotation maintenance with `CAIRN_OLD_KEY_ENCRYPTION_KEY
 
 ## Web Container
 
-`apps/web/Dockerfile` installs dependencies with Bun, builds the SvelteKit app with Bun-executed Vite, and runs the adapter-node server with `bun build/index.js`. The tested web runtime is Bun 1.3.14. The Docker `HEALTHCHECK` runs `bun scripts/healthcheck.ts`, which probes `http://127.0.0.1:${PORT}/healthz` and requires a `200` response with `status="ok"`.
+`apps/web/Dockerfile` installs dependencies with Bun, builds the SvelteKit app with Bun-executed Vite, and runs the adapter-node server with `bun build/index.js`. The tested web runtime is Bun 1.3.14: CI installs Bun with `oven-sh/setup-bun`, invokes Vite, SvelteKit, Vitest, and Playwright through Bun, and the Dockerfile uses `oven/bun:1.3.14` for build/runtime stages. The Docker `HEALTHCHECK` runs `bun scripts/healthcheck.ts`, which probes `http://127.0.0.1:${PORT}/healthz` and requires a `200` response with `status="ok"`.
 
 Runtime variables:
 
@@ -145,7 +175,7 @@ Runtime variables:
 
 ## Windows Build Notes
 
-The workspace requires Rust stable 1.94 or newer. `sqlx 0.9` sets the current dependency floor. `webauthn-rs` depends on OpenSSL, and the AWS-LC JWT backend depends on CMake and NASM. On Windows without Visual Studio Build Tools, use:
+The workspace requires Rust stable 1.96 or newer. `webauthn-rs` depends on OpenSSL, and the AWS-LC JWT backend depends on CMake and NASM. On Windows without Visual Studio Build Tools, use:
 
 ```powershell
 rustup toolchain install stable-x86_64-pc-windows-gnu --profile minimal --component rustfmt --component clippy

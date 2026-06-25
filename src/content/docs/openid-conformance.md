@@ -5,7 +5,7 @@ category: "Protocol"
 order: 130
 source: "docs/openid-conformance.md"
 ---
-Cairn Identity targets the OpenID Foundation Config OP and Basic OP profiles for v1. Implicit, hybrid, dynamic registration, and form-post profiles stay out of scope because v1 intentionally supports only Authorization Code + PKCE with query response mode.
+Cairn Identity targets the OpenID Foundation Config OP and Basic OP profiles for v1. For browser and OpenID conformance profiles, v1 intentionally supports only Authorization Code + PKCE with query response mode. The OAuth token endpoint also supports `client_credentials` for configured confidential clients, but that grant is outside the browser/OpenID conformance path. Implicit, hybrid, dynamic registration, and `response_mode=form_post` profiles stay out of scope. The Basic OP authorization endpoint still accepts both GET query requests and `application/x-www-form-urlencoded` POST authorization requests.
 
 Primary references:
 
@@ -26,7 +26,7 @@ The `openid_conformance` block reports:
 - Whether all static-client environment variables are present.
 - The missing variable names, if any.
 - The artifact commands for static registration and suite JSON generation.
-- That external Config OP and Basic OP suite results are still required before public beta.
+- That external Config OP and Basic OP suite results are still required before the first public RC.
 
 The block does not print client IDs, client secrets, or generated suite JSON. Keep the generated `cairn-oidcc-static.json` out of source control because it contains client secrets.
 
@@ -93,7 +93,7 @@ The output has this shape:
 }
 ```
 
-The OIDF runner reads the suite fields in this JSON, while `operations evidence-check` also requires the root `generated_at` timestamp to be fresh. Keep this file out of source control because it contains client secrets.
+The OIDF runner reads the suite fields in this JSON, while `cairnid evidence check` also requires the root `generated_at` timestamp to be fresh. Keep this file out of source control because it contains client secrets.
 
 Run these OIDF plan names against that JSON:
 
@@ -104,20 +104,50 @@ python <openid-conformance-suite>/scripts/run-test-plan.py oidcc-basic-certifica
 
 The hosted certification UI can use the same JSON from the suite's JSON configuration tab.
 
+## Expected Basic OP Skips And Warnings
+
+These notes describe the current Basic OP request-surface behavior so external OIDF results can be interpreted without overstating support:
+
+- `/oauth2/authorize` accepts `application/x-www-form-urlencoded` POST requests with the same validation, session, consent, and redirect behavior as GET. JSON and other content types are rejected.
+- Discovery continues to advertise `request_parameter_supported=false` and `request_uri_parameter_supported=false`. If Basic OP request-object modules send `request` or `request_uri`, Cairn returns `request_not_supported` or `request_uri_not_supported` through the registered redirect URI so the suite can skip those unsupported modules.
+- Discovery continues to advertise `claims_parameter_supported=false`; Cairn only accepts the narrow Basic OP `claims={"userinfo":{"name":{"essential":true}}}` path. This is enough for `oidcc-claims-essential` to complete, but it is not general claims-parameter support.
+- `phone` and `address` are intentionally absent from `scopes_supported`, so `oidcc-scope-phone`, `oidcc-scope-address`, and all-scope coverage that requires them are expected skips.
+- `profile` and `email` are supported scopes, but Basic OP can still report warnings when the suite expects the full standard claim set. Cairn currently returns the implemented subset only: `name` for `profile`, and `email` plus `email_verified` for `email`.
+
+Do not treat these notes as a certification claim. Basic OP readiness for the first public RC still requires an external OIDF run against the production-like issuer and archived token-free evidence.
+
 ## Result Templates
 
-When archiving an official published result URL instead of a full suite export, generate token-free normalized summary templates before the external run:
+Generate token-free result templates before the external run when operators need a reminder of the normalized summary shape:
 
 ```powershell
 cairn-api conformance oidcc-result-template config-op > openid-config-op-result.template.json
 cairn-api conformance oidcc-result-template basic-op > openid-basic-op-result.template.json
 ```
 
-After the matching OIDF suite run is complete, save the final normalized files as `openid-config-op-result.json` and `openid-basic-op-result.json`. Replace the placeholder completion timestamp and official result URL, set `status="FINISHED"`, and set `result` to `PASSED` or `WARNING` only when the OIDF result supports that value. Do not include static-client secrets, cookies, request headers, passwords, screenshots, or browser session data in normalized result summaries; `operations evidence-check` rejects secret-bearing field names in normalized OpenID result JSON.
+These templates are operator guidance only. `cairnid evidence check` still rejects them after an operator changes only `status`, `result`, `completed_at`, and `published_result_url`, because passing normalized summaries must include `oidf_export_provenance` generated from an OIDF export normalization run. Do not include static-client secrets, cookies, request headers, passwords, screenshots, or browser session data in normalized result summaries; `cairnid evidence check` rejects secret-bearing field names in normalized OpenID result JSON.
+
+When an official OIDF certification package ZIP or unpacked export directory is available, normalize it locally instead of reshaping the result JSON by hand:
+
+```powershell
+cairn-api conformance oidcc-normalize-export config-op .\oidf-config-op-export.zip --published-result-url https://www.certification.openid.net/plan-detail.html?plan=<plan-id> > openid-config-op-result.json
+cairn-api conformance oidcc-normalize-export basic-op .\oidf-basic-op-export --published-result-url https://www.certification.openid.net/plan-detail.html?plan=<plan-id> > openid-basic-op-result.json
+```
+
+The normalizer reads `index.json` and `test-logs/test-log-*.json`, requires the expected Config OP or Basic OP plan name, selects the latest `instances[]` entry for each plan module, requires that selected instance to have a matching test log, requires `https://www.certification.openid.net` suite origins, accepts only selected tests with `FINISHED` status and `PASSED` or `WARNING` results, and rejects secret-bearing fields or credential-shaped values before emitting the token-free normalized summary.
+
+Normalizer output includes `oidf_export_provenance` with:
+
+- `schema="cairnid.oidf-export-provenance.v1"` and `normalizer="cairn-api conformance oidcc-normalize-export"`.
+- `source_format="zip"` or `source_format="directory"`, `exported_from`, and the OIDF `suite_version`.
+- `plan_module_count`, `test_log_count`, sorted `module_names`, and `selected_instances` containing one selected/latest test id per module.
+- `plan_modules_sha256` over the plan name and selected module/instance pairs, plus `test_logs_sha256` over reduced selected-test metadata only.
+
+Those fields are token-free. They do not include client secrets, cookies, request headers, ID/access/refresh tokens, passwords, screenshots, or raw logs.
 
 ## Evidence Gate
 
-Public beta requires:
+The first-public-RC evidence gate requires:
 
 - Passing Config OP and Basic OP results for the production-like deployment under test.
 - Published OIDF result links or token-free archived plan exports.
@@ -136,10 +166,10 @@ Save normalized passing result JSON files into the release evidence directory as
 The release evidence checker validates the generated static registration report and static suite config, including their root `generated_at` freshness, before accepting suite result files. For result files, it accepts either:
 
 - OpenID conformance-suite plan export JSON with the expected `planInfo.planName`, a fresh root `exportedAt`, root `exportedFrom` on `https://www.certification.openid.net`, non-empty module instances, non-empty `testLogExports`, each exported test carrying an export timestamp and matching suite origin, and each exported test reporting `status="FINISHED"` with `result="PASSED"` or `result="WARNING"`. Plan exports must be token-free; use normalized published-result summaries when an export contains request headers, cookies, client secrets, passwords, or browser/session data.
-- A normalized published-result summary with `source="openid-conformance-suite"`, the exact `plan_name`, the matching `certification_profile`, `status="FINISHED"`, `result="PASSED"` or `result="WARNING"`, RFC3339 `completed_at`, and an HTTPS `published_result_url` on `www.certification.openid.net`.
+- A normalized published-result summary with `source="openid-conformance-suite"`, the exact `plan_name`, the matching `certification_profile`, `status="FINISHED"`, `result="PASSED"` or `result="WARNING"`, RFC3339 `completed_at`, an HTTPS `published_result_url` on `www.certification.openid.net`, and `oidf_export_provenance` emitted by `cairn-api conformance oidcc-normalize-export`.
 
-It rejects generic success-shaped JSON, wrong plan names, failed or unknown results, unfinished tests, untouched templates with `status="template"`, secret-bearing result fields in either accepted format, and non-empty root `failures` or `errors` arrays:
+It rejects generic success-shaped JSON, wrong plan names, failed or unknown results, unfinished tests, untouched templates with `status="template"`, manually completed templates with placeholder or missing export provenance, secret-bearing result fields in either accepted format, and non-empty root `failures` or `errors` arrays:
 
 ```powershell
-cairn-api operations evidence-check <evidence-dir>
+cairnid evidence check <evidence-dir>
 ```

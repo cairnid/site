@@ -35,9 +35,9 @@ const surfaces = [
 
 // Code/terminal block bodies  -  rendered via set:html so literal braces, angle
 // brackets, and entities survive Astro's template parser intact.
-const deployTerminal = `<span class="pr">$</span> <span class="st">docker compose up -d</span>
-<span class="cm"># cairn-api  -  cairn-web  -  postgres  -  ready in ~20s</span>
-<span class="pr">$</span> <span class="st">open https://id.example.com/login</span>`;
+const deployTerminal = `<span class="pr">$</span> <span class="st">docker compose -f infra/docker-compose.yml up --build</span>
+<span class="cm"># postgres  -  api  -  web  -  local evaluation stack</span>
+<span class="pr">$</span> <span class="st">open http://localhost:5173/login</span>`;
 
 const quickstartTerminal = `<span class="cm"># 1  -  generate a key-encryption key</span>
 <span class="pr">$</span> <span class="st">cargo run -p cairn-api -- signing-key generate-kek</span>
@@ -112,7 +112,7 @@ const hint = (text: string) => ({ ['place' + 'holder']: text });
 
 <SiteLayout
   title="Strict OIDC you can audit"
-  description="An OIDC and OAuth provider small enough to read end to end. It runs from one container, matches every redirect exactly, and writes an audit line for every token."
+  description="An OIDC and OAuth provider small enough to read end to end. It runs as a local Docker Compose stack for evaluation, matches every redirect exactly, and writes an audit line for every token."
   active="product"
 >
   <div class="relative">
@@ -122,9 +122,9 @@ const hint = (text: string) => ({ ['place' + 'holder']: text });
         <div class="mx-auto max-w-[760px]">
           <span class="inline-flex items-center gap-[9px] whitespace-nowrap rounded-pill border border-line bg-card py-1 pr-[13px] pl-[5px] text-[12.5px] font-medium text-secondary shadow-[var(--shadow-xs)]"><span class="rounded-pill bg-[var(--accent-bg)] px-[9px] py-0.5 text-[10.5px] font-semibold tracking-[0.01em] text-on-accent">Pre-beta</span>Built in the open, working toward the first release candidate<Icon name="arrow-right" size={14} class="text-muted" /></span>
           <h1 class="mx-auto mt-[22px] max-w-[24ch] text-[clamp(34px,4.8vw,52px)] font-bold leading-[1.05] tracking-[-0.025em] text-fg [text-wrap:balance]">Strict single sign-on you can <span class="text-accent">audit, line by line</span><span class="cursor font-normal text-accent">_</span></h1>
-          <p class="mx-auto mt-[18px] max-w-[56ch] text-[clamp(15px,1.6vw,18px)] leading-[1.55] text-secondary [text-wrap:pretty]">An OIDC and OAuth provider small enough to read end to end. It runs from one container, matches every redirect exactly, and writes an audit line for every token  -  so you can prove who reached what.</p>
+          <p class="mx-auto mt-[18px] max-w-[56ch] text-[clamp(15px,1.6vw,18px)] leading-[1.55] text-secondary [text-wrap:pretty]">An OIDC and OAuth provider small enough to read end to end. It runs as a local Docker Compose stack for evaluation, matches every redirect exactly, and writes an audit line for every token  -  so you can prove who reached what.</p>
           <div class="mt-8 flex flex-wrap justify-center gap-3">
-            <a class="cn-btn cn-btn--primary" href="#start"><Icon name="terminal" size={16} />Run the stack</a>
+            <a class="cn-btn cn-btn--primary" href="#start"><Icon name="terminal" size={16} />Run locally</a>
             <a class="cn-btn cn-btn--secondary" href="#protocol"><Icon name="file-text" size={16} />Read the spec</a>
           </div>
           <div class="mt-6 flex flex-wrap justify-center gap-y-2 gap-x-5">
@@ -330,7 +330,7 @@ const hint = (text: string) => ({ ['place' + 'holder']: text });
         <div class="b flex flex-col gap-[13px] rounded-md border border-line bg-card p-[clamp(20px,2.4vw,28px)] transition-[border-color] duration-[120ms] ease-standard hover:border-line-strong [grid-column:span_7] max-[860px]:[grid-column:span_12]">
           <div>
             <div class="font-mono text-[11.5px] font-semibold text-accent">deploy_</div>
-            <div class="mt-[5px] text-[clamp(18px,1.9vw,22px)] font-semibold leading-[1.15] tracking-[-0.015em]">One container, your infrastructure</div>
+            <div class="mt-[5px] text-[clamp(18px,1.9vw,22px)] font-semibold leading-[1.15] tracking-[-0.015em]">Compose stack, your infrastructure</div>
           </div>
           <p class="max-w-[44ch] text-[13.5px] leading-[1.55] text-secondary">No managed cloud and no per-seat pricing. Bring it up with Docker Compose, then bootstrap the first admin from the sign-in screen.</p>
           <div class="mt-auto pt-1">
@@ -495,7 +495,7 @@ const hint = (text: string) => ({ ['place' + 'holder']: text });
         <div class="pt-1 font-mono text-xs font-medium text-accent">05</div>
         <div>
           <div class="text-[12.5px] font-semibold tracking-normal text-accent">Quick start</div>
-          <h2 class="mt-2 max-w-[22ch] text-[clamp(25px,3vw,34px)] leading-[1.08] tracking-[-0.018em]">Run the whole stack in five minutes</h2>
+          <h2 class="mt-2 max-w-[22ch] text-[clamp(25px,3vw,34px)] leading-[1.08] tracking-[-0.018em]">Run the local stack with Docker Compose</h2>
           <p class="mt-3 max-w-[56ch] text-[15px] leading-[1.55] text-secondary">Generate a key-encryption key, set it, and run the full local stack with Docker Compose. Bootstrap the first administrator from <code style="font-family:var(--font-mono);font-size:0.9em;">/login</code>.</p>
         </div>
       </div>
@@ -513,8 +513,8 @@ const hint = (text: string) => ({ ['place' + 'holder']: text });
   <div class="border-y border-line bg-sunken">
     <section class="py-[clamp(56px,7vw,92px)] text-center">
       <div class="wrap">
-        <h2 class="text-[clamp(26px,3.4vw,38px)] leading-[1.08] tracking-[-0.02em]">Run it yourself in five minutes</h2>
-        <p class="mx-auto mt-3.5 max-w-[50ch] text-base leading-[1.55] text-secondary">Generate a key, start the stack, and bootstrap the first admin. No account to create and no sales call  -  it's open source, all the way down.</p>
+        <h2 class="text-[clamp(26px,3.4vw,38px)] leading-[1.08] tracking-[-0.02em]">Run it locally with Compose</h2>
+        <p class="mx-auto mt-3.5 max-w-[50ch] text-base leading-[1.55] text-secondary">Generate a key, start the local stack, and bootstrap the first admin. No account to create and no sales call  -  it's open source, all the way down.</p>
         <div class="mt-8 flex flex-wrap justify-center gap-3">
           <a class="cn-btn cn-btn--primary" href="#start"><Icon name="terminal" size={16} />Get started</a>
           <a class="cn-btn cn-btn--secondary" href="https://github.com/cairnid/cairnid"><Icon name="github" size={16} />View on GitHub</a>

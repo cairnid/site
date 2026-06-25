@@ -7,7 +7,7 @@ source: "Product runtime security policy"
 ---
 This page documents the CairnID product/runtime security policy. It is not sourced from the standalone site root `SECURITY.md`, which covers site-only reports.
 
-Cairn Identity is not yet a public beta provider. Treat the product/runtime as an actively developed security project until the release gates in `docs/release-gates.md` are closed. The current formal threat model is maintained in `docs/threat-model.md`.
+Cairn Identity is not yet a public beta provider. Treat the product/runtime as an actively developed security project until the release gates at `/docs/release-gates/` are closed. The current formal threat model is maintained at `/docs/threat-model/`.
 
 ## Supported Versions
 
@@ -43,7 +43,7 @@ Use only a private reporting route that the product repository or organization h
 
 ## Triage Targets
 
-Until public releases exist, these are best-effort targets rather than a contractual SLA:
+Until public releases exist, these are best-effort targets rather than a contractual service-level agreement:
 
 | Severity | Examples | Initial response target | Fix target |
 | --- | --- | --- | --- |

@@ -16,6 +16,8 @@ Cairn Identity defaults to a narrow OIDC/OAuth surface:
 - Authorization-code and refresh-token exchanges are bound to the client recorded on the stored grant.
 - Token introspection and revocation require client authentication and are scoped to that client's tokens. Refresh-token revocation invalidates the refresh family and access tokens linked to that family.
 - Admin OIDC client responses never expose stored `client_secret_hash` values; confidential-client creation and rotation return raw client secrets only once, and rotation requires CSRF plus an organization-owned confidential client.
+- Admin OIDC client detail and configuration update APIs are tenant-scoped and return the same sanitized client shape. Configuration updates require recent admin authentication plus CSRF, replace only editable fields, cannot change client identifiers, grant policy, lifecycle status, or stored secret hashes, and audit changed field names plus credential side-effect counts without secrets.
+- Admin OIDC client redirect URI or allowed-scope changes invalidate pending unexpired authorization codes for that client. Allowed-scope changes also revoke active access and refresh tokens, while non-security-only editable changes do not revoke runtime credentials.
 - Admin OIDC client disable/reactivation requires CSRF plus tenant ownership. Disabling a client transactionally invalidates pending authorization codes, revokes active access and refresh tokens for that client, and blocks authorization, OAuth client authentication, UserInfo, consent, and logout redirect use. Reactivation never un-revokes old credentials.
 - Admin and current-user consent revocation are scoped to the owning organization and consenting user, revoke active consent rows for the selected user-client pair, invalidate pending authorization codes, and revoke matching user access and refresh tokens.
 - Reusable consent policy templates are organization-scoped and v1 only supports `required_once` or `always_required`; templates cannot disable consent, and `always_required` ignores prior active grants during authorization except for the immediate post-approval retry guarded by a five-minute one-use marker bound to the browser session and canonical authorize request hash.
@@ -58,11 +60,11 @@ Cairn Identity defaults to a narrow OIDC/OAuth surface:
 - Container buildability is checked in CI by validating Compose, building the API and web images, and running token-free runtime command smokes inside both images.
 - Production-oriented security headers on both API and web responses. The web UI uses SvelteKit CSP generation so framework-generated inline scripts/styles receive nonces or hashes.
 
-The formal threat model is maintained in [docs/threat-model.md](threat-model.md). Changes touching authentication, OIDC/OAuth behavior, secrets, cookies, persistence, deployment, or audit behavior must update that model when they add or change a trust boundary, protected asset, or required invariant.
+The formal threat model is maintained in [threat model](/docs/threat-model/). Changes touching authentication, OIDC/OAuth behavior, secrets, cookies, persistence, deployment, or audit behavior must update that model when they add or change a trust boundary, protected asset, or required invariant.
 
-## Not Ready For Public Beta Until Closed
+## Not Ready For First Public RC Until Gates Close
 
-The current release blockers are tracked in [release-gates.md](release-gates.md):
+The current release blockers are tracked in [release gates](/docs/release-gates/):
 
 - OpenID Foundation conformance suite.
 - `cairn-api operations dependency-policy-evidence` from the release workspace after the pinned `cargo-deny`, `cargo-audit`, and Bun audit checks pass.
@@ -73,8 +75,8 @@ The current release blockers are tracked in [release-gates.md](release-gates.md)
 - End-to-end smoke against the chosen production email provider command.
 - Restore drill, production signing-key rotation drill, and production KEK re-encryption drill, each with `cairn-api operations preflight` evidence captured.
 
-Use `cairn-api operations evidence-plan` before evidence capture to confirm required capture environment variable names are present without printing values. Use `cairn-api operations evidence-init <evidence-dir>` to create the manifest, checklist README, and `.gitignore` guard for secret-bearing artifacts. Use `cairn-api operations evidence-status <evidence-dir>` during collection for counts and next commands, then use `cairn-api operations evidence-check <evidence-dir>` as the local release gate after those external runs. It validates scaffold integrity, strict directory inventory, required evidence artifacts, freshness, forbidden secret-bearing field names in token-free artifacts, and successful statuses without printing secrets; failure text redacts obvious secret-looking values before reporting.
+Use `cairnid evidence plan` before evidence capture to confirm required capture environment variable names are present without printing values. Use `cairnid evidence init <evidence-dir>` to create the manifest, checklist README, and `.gitignore` guard for secret-bearing artifacts. Use `cairnid evidence status <evidence-dir>` during collection for counts and next commands, then use `cairnid evidence check <evidence-dir>` as the local release gate after those external runs. It validates scaffold integrity, strict directory inventory, required evidence artifacts, freshness, forbidden secret-bearing field names in token-free artifacts, and successful statuses without printing secrets; failure text redacts obvious secret-looking values before reporting.
 
 ## Reporting Security Issues
 
-Do not open public issues for suspected vulnerabilities. Follow [SECURITY.md](../SECURITY.md).
+Do not open public issues for suspected vulnerabilities. Follow the [security policy](/docs/security-policy/).

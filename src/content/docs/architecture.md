@@ -3,7 +3,7 @@ title: "Architecture"
 description: "Runtime components, crate boundaries, API modules, storage, and deployment flow."
 category: "Start"
 order: 20
-source: "docs/architecture/overview.md"
+source: "docs/architecture/overview"
 ---
 Cairn Identity is a monorepo with one Rust API, one SvelteKit web app, and focused Rust crates for reusable domain logic.
 
