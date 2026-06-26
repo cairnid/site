@@ -1,11 +1,19 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "cairnid-site",
+  "main": "./src/worker.ts",
   "compatibility_date": "2026-06-24",
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     "not_found_handling": "404-page"
   },
+  "kv_namespaces": [
+    {
+      "binding": "WAITLIST",
+      "id": "c35cd7bd49484e59b1131b8702dcd5d8"
+    }
+  ],
   "routes": [
     {
       "pattern": "cairnid.com",

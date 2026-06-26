@@ -80,7 +80,9 @@ Keep the CairnID token system as the source of truth.
 The source of truth is `wrangler.jsonc`:
 
 - `assets.directory` points at `./dist`.
+- `assets.binding` exposes the static asset binding to the Worker script.
 - `assets.not_found_handling` uses `404-page`.
+- `kv_namespaces` binds `WAITLIST` for the temporary Cloud email waitlist.
 - `routes` attaches the Worker to `cairnid.com` and `www.cairnid.com` as custom domains.
 
 GitHub Actions builds on pushes to `main` and deploys with
@@ -106,4 +108,15 @@ Before publishing, run:
 bun install --frozen-lockfile
 bun run check
 bun run build
+```
+
+Temporary Cloud waitlist submissions are stored in Workers KV under
+`cloud-waitlist:v1:<sha256(email)>` until Resend or a dedicated CRM workflow is
+connected.
+
+To inspect entries:
+
+```sh
+bun --bun wrangler kv key list --namespace-id c35cd7bd49484e59b1131b8702dcd5d8 --prefix cloud-waitlist:v1:
+bun --bun wrangler kv key get --namespace-id c35cd7bd49484e59b1131b8702dcd5d8 <key>
 ```
