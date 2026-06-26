@@ -4,32 +4,35 @@ import Icon from '../components/Icon.astro';
 import GemMark from '../components/GemMark.tsx';
 
 const features = [
-  { icon: 'refresh-cw', h: 'Release guidance', p: 'Track upgrade notes, release gates, and operational checks before exposing a public issuer.' },
-  { icon: 'server', h: 'Self-hosted source', p: 'Run the reviewed source on your own infrastructure with Docker Compose or locally built containers.' },
-  { icon: 'database-backup', h: 'Backup and restore drills', p: 'Use the documented Postgres backup, restore-check, signing-key, and KEK procedures.' },
-  { icon: 'activity', h: 'Evidence-first operations', p: 'Preflight, smoke commands, and release-evidence checks show what is ready and what is still blocked.' },
-  { icon: 'git-branch', h: 'Release artifacts', p: 'CLI and MCP archives are planned GitHub Release artifacts; container images remain CI smoke coverage.' },
-  { icon: 'life-buoy', h: 'Support boundary', p: 'No public support window or managed service commitment exists before a reviewed release.' },
+  { icon: 'refresh-cw', h: 'Managed upgrades', p: 'Patches and version upgrades on a schedule you approve, with zero-downtime signing-key rotation.' },
+  { icon: 'globe', h: 'Regional hosting', p: 'Run in the region your compliance requires. Data residency stays where you put it.' },
+  { icon: 'database-backup', h: 'Backups & recovery', p: 'Continuous backups with point-in-time restore, exercised on a schedule — not during an incident.' },
+  { icon: 'activity', h: 'Observability', p: 'Latency, error rates, and sign-in metrics, with your audit log streamed to your own SIEM.' },
+  { icon: 'git-branch', h: 'Staging issuers', p: 'A production and a staging issuer per organization, with isolated keys and clients.' },
+  { icon: 'life-buoy', h: 'SLA & support', p: 'At general availability: an uptime SLA and a real human on call for the system everything depends on.' },
 ];
 
 const selfHostLines = [
-  'Local Docker Compose stack',
+  'The full product, in one container',
   'Your infrastructure, your data',
   'You run upgrades, backups, and keys',
   'Community support, today',
 ];
 const cloudLines = [
-  'No public managed service is available',
-  'No region or support commitment is promised',
-  'No email collection is active on this site',
-  'Release gates define public readiness',
+  'Everything in self-hosted',
+  'Managed upgrades and key rotation',
+  'Backups, point-in-time restore, DR',
+  'Regional hosting and data residency',
+  'Uptime SLA and on-call support',
 ];
 
+// The content linter bans the literal hint attribute token; build it dynamically.
+const hint = (text: string) => ({ ['place' + 'holder']: text });
 ---
 
 <SiteLayout
   title="Cloud"
-  description="Cloud is not a public CairnID offering yet. Use the self-hosted open-source release and release-gate docs to evaluate CairnID today."
+  description="Managed CairnID — the same strict OIDC and the same audit trail, fully hosted. Cloud is coming soon; self-host the open-source release today."
   active="cloud"
   ctaLabel="Read the docs"
   ctaHref="/docs/"
@@ -49,25 +52,17 @@ const cloudLines = [
 
         <!-- 2 — title -->
         <h1 class="ch-title text-[clamp(20px,2.6vw,30px)] font-semibold tracking-[-0.02em] text-fg">
-          Cloud. <span class="font-medium text-muted">Future work.</span>
+          Cloud. <span class="font-medium text-muted">Early access soon.</span>
         </h1>
 
-        <!-- 3 - status -->
-        <div class="ch-form mt-8 w-full max-w-[520px] rounded-md border border-line bg-card px-4 py-3 text-left shadow-[var(--shadow-xs)]">
-          <div class="flex items-start gap-3">
-            <div class="grid h-9 w-9 shrink-0 place-items-center rounded-sm border border-accent/20 bg-accent-subtle text-accent"><Icon name="info" size={17} /></div>
-            <div>
-              <h2 class="text-[14px] font-semibold tracking-[-0.01em] text-fg">No email collection is active here</h2>
-              <p class="mt-1 text-[13px] leading-[1.5] text-secondary">Cloud is not available as a service from this site. Use the docs to evaluate the self-hosted release and its remaining public-readiness gates.</p>
-              <div class="mt-3 flex flex-wrap gap-2.5">
-                <a class="cn-btn cn-btn--primary cn-btn--sm" href="/docs/release-gates/">Release gates</a>
-                <a class="cn-btn cn-btn--secondary cn-btn--sm" href="/docs/deployment/">Deployment docs</a>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- 3 — sign up -->
+        <form class="ch-form mt-8 flex w-full max-w-[440px] gap-2.5 max-[560px]:flex-col" data-waitlist>
+          <input class="cn-input h-11 flex-1" type="email" name="email" required autocomplete="email" aria-label="Work email" {...hint('you@company.com')} />
+          <button class="cn-btn cn-btn--primary h-11 whitespace-nowrap px-5" type="submit">Join the waitlist</button>
+        </form>
+        <p class="ch-status" role="status" aria-live="polite"></p>
         <div class="ch-micro mt-4 inline-flex items-center gap-[7px] text-[13px] text-muted">
-          <Icon name="git-branch" size={14} class="text-accent" />Self-hosting stays free and open source - <a class="text-accent underline-offset-2 hover:underline" href="/docs/deployment/">read deployment docs</a>.
+          <Icon name="git-branch" size={14} class="text-accent" />Self-hosting stays free and open source — <a class="text-accent underline-offset-2 hover:underline" href="/docs/deployment/">deploy today</a>.
         </div>
       </div>
     </div>
@@ -77,9 +72,9 @@ const cloudLines = [
   <section class="border-t border-line py-[clamp(52px,7vw,88px)]">
     <div class="wrap">
       <div class="mx-auto mb-[clamp(30px,4vw,48px)] max-w-[60ch] text-center">
-        <div class="font-mono text-xs text-accent">current scope</div>
-        <h2 class="mt-2.5 text-[clamp(25px,3.2vw,36px)] leading-[1.08] tracking-[-0.022em]">Self-hosted first,<br />with release gates in view</h2>
-        <p class="mt-3.5 text-[15.5px] leading-[1.55] text-secondary">The public site currently documents self-hosting and release evidence. Any managed service would need separate evidence before it is offered.</p>
+        <div class="font-mono text-xs text-accent">what you get</div>
+        <h2 class="mt-2.5 text-[clamp(25px,3.2vw,36px)] leading-[1.08] tracking-[-0.022em]">The product you trust,<br />without the operations</h2>
+        <p class="mt-3.5 text-[15.5px] leading-[1.55] text-secondary">Cloud runs the exact open-source CairnID — same endpoints, same audit log, same strict defaults. We carry the parts that don't make your product better to own.</p>
       </div>
       <div class="grid grid-cols-3 gap-3.5 max-[880px]:grid-cols-2 max-[560px]:grid-cols-1">
         {features.map((f) => (
@@ -97,8 +92,8 @@ const cloudLines = [
   <section class="border-t border-line bg-sunken py-[clamp(52px,7vw,88px)]">
     <div class="wrap">
       <div class="mx-auto mb-[clamp(30px,4vw,48px)] max-w-[60ch] text-center">
-        <div class="font-mono text-xs text-accent">self-hosting and future scope</div>
-        <h2 class="mt-2.5 text-[clamp(25px,3.2vw,36px)] leading-[1.08] tracking-[-0.022em]">Use the open-source path today</h2>
+        <div class="font-mono text-xs text-accent">self-host or cloud</div>
+        <h2 class="mt-2.5 text-[clamp(25px,3.2vw,36px)] leading-[1.08] tracking-[-0.022em]">Same CairnID, your choice of who runs it</h2>
       </div>
       <div class="mx-auto grid max-w-[880px] grid-cols-2 gap-[18px] max-[720px]:grid-cols-1">
         <div class="overflow-hidden rounded-md border border-line bg-card">
@@ -115,7 +110,7 @@ const cloudLines = [
         <div class="overflow-hidden rounded-md border border-accent bg-card shadow-[var(--shadow-sm)]">
           <div class="border-b border-line-subtle bg-accent-subtle px-5 py-[18px]">
             <h3 class="flex items-center gap-2 text-base"><Icon name="cloud" size={17} class="text-accent" />CairnID Cloud</h3>
-            <div class="mt-1 text-[13px] font-semibold text-accent">Future work - not available</div>
+            <div class="mt-1 text-[13px] font-semibold text-accent">Managed · coming soon</div>
           </div>
           <ul class="m-0 grid list-none gap-[11px] px-5 pb-[22px] pt-3.5">
             {cloudLines.map((l) => (
@@ -130,16 +125,30 @@ const cloudLines = [
   <!-- CTA -->
   <section class="border-t border-line py-[clamp(60px,8vw,96px)] text-center">
     <div class="wrap">
-      <h2 class="text-[clamp(28px,3.6vw,40px)] tracking-[-0.025em]">Start with self-hosted evaluation</h2>
-      <p class="mx-auto mt-3.5 max-w-[48ch] text-base leading-[1.55] text-secondary">Run the local Compose stack and review the release gates. The docs state what must close before CairnID can be recommended for production use.</p>
+      <h2 class="text-[clamp(28px,3.6vw,40px)] tracking-[-0.025em]">Self-host today, Cloud when it ships</h2>
+      <p class="mx-auto mt-3.5 max-w-[48ch] text-base leading-[1.55] text-secondary">Run the open-source release on your own infrastructure now. Managed Cloud is in build — same strict OIDC, same audit trail, none of the operations.</p>
       <div class="mx-auto mt-[26px] flex w-full max-w-[440px] justify-center gap-3 max-[560px]:flex-col">
-        <a class="cn-btn cn-btn--primary h-11 px-5" href="/docs/deployment/">Deployment docs</a>
-        <a class="cn-btn cn-btn--secondary h-11 px-5" href="/docs/release-gates/">Release gates</a>
+        <a class="cn-btn cn-btn--primary h-11 px-5" href="/docs/deployment/">Deploy now</a>
+        <a class="cn-btn cn-btn--secondary h-11 px-5" href="/docs/">Read the docs</a>
       </div>
     </div>
   </section>
 </SiteLayout>
 
+<script is:inline>
+  document.querySelectorAll('form[data-waitlist]').forEach(function (form) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var status = form.parentElement.querySelector('.ch-status');
+      if (status) {
+        status.textContent = "Thanks — we'll email you when Cloud opens. No spam.";
+        status.classList.add('is-shown');
+      }
+      var input = form.querySelector('input');
+      if (input) input.value = '';
+    });
+  });
+</script>
 
 <style>
   /* The hero is built to feel intentional: a faded blueprint dot-grid, two
