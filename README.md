@@ -117,6 +117,6 @@ connected.
 To inspect entries:
 
 ```sh
-bun --bun wrangler kv key list --namespace-id c35cd7bd49484e59b1131b8702dcd5d8 --prefix cloud-waitlist:v1:
-bun --bun wrangler kv key get --namespace-id c35cd7bd49484e59b1131b8702dcd5d8 <key>
+bun --bun wrangler kv key list --remote --namespace-id c35cd7bd49484e59b1131b8702dcd5d8 --prefix cloud-waitlist:v1:
+bun --bun wrangler kv key get --remote --text --namespace-id c35cd7bd49484e59b1131b8702dcd5d8 <key>
 ```
